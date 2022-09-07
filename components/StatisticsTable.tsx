@@ -72,11 +72,11 @@ const StatisticsTable = ({
       columnId: string
     ) => {
       if (rowA.values[columnId] > rowB.values[columnId]) {
-        return -1;
+        return 1;
       }
 
       if (rowB.values[columnId] > rowA.values[columnId]) {
-        return 1;
+        return -1;
       }
 
       return 0;
