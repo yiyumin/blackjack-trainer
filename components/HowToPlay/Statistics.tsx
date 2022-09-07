@@ -4,12 +4,12 @@ const Statistics = () => {
       <h1 className='text-center text-xl font-bold'>Statistics</h1>
 
       <div>
-        To view you hand statistics, begin by clicking on the bar chart icon in
+        To view your hand statistics, begin by clicking on the bar chart icon in
         the top right corner. By default, the records are sorted to show
         scenarios with the lowest correct percentage first.
       </div>
 
-      <ol className='ml-2.5 list-inside list-disc space-y-2 text-sm'>
+      <ol className='ml-2.5 list-inside list-disc space-y-6 text-sm'>
         <li>
           <span className='font-bold'>Sort </span>
           the table by clicking on any of the column headers. You are able to
