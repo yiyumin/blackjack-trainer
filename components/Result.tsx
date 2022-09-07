@@ -5,7 +5,7 @@ type ResultProps = {
 
 const Result = ({ isCorrect, explanation }: ResultProps) => {
   return (
-    <div className='grid h-32 grid-cols-2 items-center justify-items-center p-2 text-white md:h-24'>
+    <div className='grid h-20 grid-cols-2 items-center justify-items-center p-2 text-white md:h-24'>
       <div>
         {isCorrect != null && (
           <span

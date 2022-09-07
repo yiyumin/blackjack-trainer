@@ -7,7 +7,7 @@ type MoveOptionProps = {
 const MoveOption = ({ label, isEnabled = true, onClick }: MoveOptionProps) => {
   return (
     <button
-      className={`rounded-md border py-0.5 px-1.5 text-xs md:px-2 md:py-1 md:text-base ${
+      className={`rounded-md border py-3 px-4 text-xs md:px-3 md:py-1.5 md:text-base ${
         isEnabled ? 'border-white text-white' : 'border-gray-400 text-gray-400'
       }`}
       disabled={!isEnabled}

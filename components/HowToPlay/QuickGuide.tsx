@@ -19,7 +19,7 @@ const QuickGuide = () => {
         .
       </div>
 
-      <div className='flex flex-col gap-y-2.5'>
+      <div className='flex flex-col gap-y-5'>
         <h3 className='text-lg font-medium'>Getting Started</h3>
         <ol className='ml-2.5 list-inside list-decimal space-y-6 text-sm'>
           <li>

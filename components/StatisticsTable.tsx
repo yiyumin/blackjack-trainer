@@ -146,30 +146,30 @@ const StatisticsTable = ({
                   {value}
                 </div>
               ),
-              width: 100,
+              width: 80,
             },
             {
               Header: 'Dealer Showing',
               accessor: 'dealerKey',
               Cell: ({ value }) => (value === '10' ? '10 (J/Q/K)' : value),
-              width: 75,
+              width: 60,
             },
             {
               Header: 'Times Correct',
               accessor: 'timesCorrect',
-              width: 40,
+              width: 32,
             },
             {
               Header: 'Times Seen',
               accessor: 'timesSeen',
-              width: 40,
+              width: 32,
             },
             {
               Header: 'Correct %',
               accessor: (row) => row.timesCorrect / row.timesSeen,
               id: 'correctPercent',
               Cell: ({ value }: { value: number }) => (value * 100).toFixed(2),
-              width: 75,
+              width: 60,
               sortType: sortByNumber,
             },
             {
@@ -185,7 +185,7 @@ const StatisticsTable = ({
                   </Popover.Panel>
                 </Popover>
               ),
-              width: 75,
+              width: 60,
             },
             {
               id: 'resetHandStat',
@@ -205,7 +205,7 @@ const StatisticsTable = ({
                   }
                 />
               ),
-              width: 40,
+              width: 32,
             },
           ],
         },
@@ -242,7 +242,7 @@ const StatisticsTable = ({
                 <th
                   {...column.getHeaderProps(column.getSortByToggleProps())}
                   key={columnIdx}
-                  className='p-0 text-xs font-normal md:text-sm md:font-bold'
+                  className='overflow-hidden text-ellipsis p-0 text-xs font-normal md:text-sm md:font-bold'
                 >
                   {column.render('Header')}
 

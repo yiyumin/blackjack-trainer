@@ -11,13 +11,13 @@ const Controls = () => {
         scenario. Alternatively, use the keyboard to select the correct move.
       </div>
 
-      <div className='flex flex-col gap-y-2.5'>
+      <div className='flex flex-col gap-y-5'>
         <h3 className='text-lg font-medium'>Keyboard Mapping</h3>
         <div>
           The keyboard controls are mapped to the move location on screen.
         </div>
 
-        <div className='mt-10 flex justify-center'>
+        <div className='flex justify-center'>
           <div className='space-y-2 rounded-xl bg-gray-200 py-5 px-10'>
             <KeyboardRow>
               <KeyboardKey title='U' description='hit' />

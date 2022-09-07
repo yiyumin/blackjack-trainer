@@ -18,14 +18,14 @@ const MoveOptions = ({
   const { isDoubleDownAllowed, isSurrenderAllowed } = useSettings();
 
   return (
-    <div className='h-1/5 p-3'>
+    <div className='h-32 p-3 md:h-48'>
       {isHandDealt ? (
         <div className='h-full'>
-          <div className='flex h-1/2 items-center justify-center gap-x-12'>
+          <div className='flex h-1/2 items-center justify-center gap-6 md:gap-x-12'>
             <MoveOption label='Hit (u)' onClick={() => makeMove('hit')} />
             <MoveOption label='Stand (i)' onClick={() => makeMove('stand')} />
           </div>
-          <div className='flex h-1/2 items-center justify-center gap-x-12'>
+          <div className='flex h-1/2 items-center justify-center gap-6 md:gap-x-12'>
             <MoveOption
               label='Split (j)'
               isEnabled={isSplittable}

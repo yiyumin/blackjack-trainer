@@ -23,7 +23,7 @@ const Statistics = ({
   const [handTypeFilter, setHandTypeFilter] = useState<HandType>();
 
   return (
-    <div className='mt-3 flex w-full flex-col gap-20 border-t border-t-slate-600 py-10 dark:text-white'>
+    <div className='mt-3 flex w-full flex-col gap-10 border-t border-t-slate-600 py-10 dark:text-white md:gap-20'>
       <StatisticsTable
         stats={stats}
         handTypeFilter={handTypeFilter}

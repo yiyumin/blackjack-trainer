@@ -8,7 +8,7 @@ type HeaderIconProps = {
 const HeaderIcon = ({ Icon, onClick }: HeaderIconProps) => {
   return (
     <button onClick={onClick}>
-      <Icon className='h-5 w-5 stroke-[#878a8c] md:h-6 md:w-6' />
+      <Icon className='h-6 w-6 stroke-[#878a8c]' />
     </button>
   );
 };
