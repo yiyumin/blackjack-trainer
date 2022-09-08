@@ -1,4 +1,4 @@
-type HeroIcon = (props: React.ComponentProps<'svg'>) => JSX.Element;
+import { HeroIcon } from '../types';
 
 type HeaderIconProps = {
   Icon: HeroIcon;

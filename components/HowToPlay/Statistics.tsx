@@ -23,10 +23,10 @@ const Statistics = () => {
         </li>
         <li>
           Be aware that certain hands have
-          <span className='font-bold'> modifiers</span>. This is indicated by a
-          red asterisk next to the hand name. Depending on the game settings,
-          certain identical hands have differing correct moves. Hover over these
-          rows with modifiers to accurately determine which scenario this is.
+          <span className='font-bold'> modifiers</span>. This is indicated by an
+          icon next to the hand name. Depending on the game settings, certain
+          identical hands may have differing correct moves. Click on this icon
+          to accurately determine which scenario this is.
         </li>
       </ol>
     </>

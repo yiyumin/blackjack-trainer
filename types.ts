@@ -92,9 +92,16 @@ type HandStat<KeyType extends string> = {
 const handTypes = ['pair', 'soft_hand', 'hard_hand'] as const;
 type HandType = typeof handTypes[number];
 
+type ModifierType = 'double_down' | 'double_down_after_split' | 'surrender';
+
+type Modifier = {
+  type: ModifierType;
+  allowed: boolean;
+};
+
 type HandStatDisplay<KeyType extends string> = HandStat<KeyType> & {
   handType: HandType;
-  modifier?: string;
+  modifier?: Modifier;
   correctMove: string;
   correctMoveDetailed: string;
 };
@@ -103,6 +110,8 @@ type PracticeType = {
   handType: HandType;
   handKey?: HandKey;
 };
+
+type HeroIcon = (props: React.ComponentProps<'svg'>) => JSX.Element;
 
 export { suits, ranks, pairKeys, softHandKeys, hardHandKeys, handTypes };
 export type {
@@ -123,4 +132,7 @@ export type {
   SoftHandKey,
   HardHandKey,
   HandKey,
+  ModifierType,
+  Modifier,
+  HeroIcon,
 };

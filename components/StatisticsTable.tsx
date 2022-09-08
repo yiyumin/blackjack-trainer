@@ -11,17 +11,36 @@ import { Popover } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/outline';
 
 import {
+  ChevronDoubleDownIcon,
+  ScissorsIcon,
+  FlagIcon,
+} from '@heroicons/react/solid';
+
+import {
   DealerKey,
   HandKey,
   HandSettingType,
   HandStatDisplay,
   HandType,
+  HeroIcon,
+  ModifierType,
   Stats,
 } from '../types';
-import { getHandFriendlyName, getHandStatsToDisplay } from '../lib/blackjack';
+import {
+  getHandFriendlyName,
+  getHandStatsToDisplay,
+  MODIFIER_TEXT,
+} from '../lib/blackjack';
 
 import StatisticsOverall from './StatisticsOverall';
 import ConfirmationPopover from './ConfirmationPopover';
+import ModifierIcon from './ModifierIcon';
+
+const MODIFIER_ICON: Record<ModifierType, HeroIcon> = {
+  double_down: ChevronDoubleDownIcon,
+  double_down_after_split: ScissorsIcon,
+  surrender: FlagIcon,
+};
 
 type StatisticsTableProps = {
   stats: Stats;
@@ -139,11 +158,22 @@ const StatisticsTable = ({
                 row: Row<HandStatDisplay<HandKey>>;
                 value: string;
               }) => (
-                <div className='text-left'>
-                  {row.original.modifier != null && (
-                    <span className='text-red-500'>*</span>
-                  )}
+                <div className='relative pr-5 text-left md:pr-10'>
                   {value}
+                  {row.original.modifier != null && (
+                    <Popover className='absolute inset-y-0 right-1 md:right-2'>
+                      <Popover.Button className='underline decoration-dotted'>
+                        <ModifierIcon
+                          Icon={MODIFIER_ICON[row.original.modifier.type]}
+                          allowed={row.original.modifier.allowed}
+                        />
+                      </Popover.Button>
+                      <Popover.Panel className='absolute z-10 w-40 -translate-x-1/4 rounded-md bg-slate-300 p-2.5 text-sm text-black md:-translate-x-1/2'>
+                        when {MODIFIER_TEXT[row.original.modifier.type]} is{' '}
+                        {row.original.modifier.allowed ? '' : 'not '}possible
+                      </Popover.Panel>
+                    </Popover>
+                  )}
                 </div>
               ),
               width: 80,
@@ -233,7 +263,7 @@ const StatisticsTable = ({
   }, [setGlobalFilter, handTypeFilter]);
 
   return (
-    <div className='h-[60vh] w-full space-y-1 overflow-y-auto px-1'>
+    <div className='h-[55vh] w-full space-y-1 overflow-y-auto px-1 md:h-[60vh]'>
       <table {...getTableProps()} className='w-full'>
         <thead className='sticky top-0 z-20 bg-slate-500'>
           {headerGroups.map((headerGroup, headerGroupIdx) => (
@@ -268,7 +298,6 @@ const StatisticsTable = ({
                   {...row.getRowProps()}
                   key={rowIdx}
                   className='bg-black text-center'
-                  title={row.original.modifier}
                 >
                   {row.cells.map((cell, cellIdx) => {
                     return (

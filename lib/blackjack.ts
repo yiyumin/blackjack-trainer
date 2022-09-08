@@ -19,6 +19,7 @@ import {
   softHandKeys,
   Hand,
   HandSettingType,
+  ModifierType,
 } from '../types';
 import { pairChart, softHandChart, hardHandChart, ChartMap } from '../data';
 
@@ -44,6 +45,12 @@ const MOVE_TEXT: Record<Move, string> = {
   double_down: 'double down',
   split: 'split the cards',
   surrender: 'surrender',
+};
+
+const MODIFIER_TEXT: Record<ModifierType, string> = {
+  double_down: 'doubling down',
+  double_down_after_split: 'doubling down after splits',
+  surrender: 'surrendering',
 };
 
 const getRandomInteger = (ceiling: number, floor: number = 0): number =>
@@ -299,9 +306,9 @@ const getMove = (
 
 const getMoveVerboseForPairs = (dealerKey: DealerKey, pairKey: PairKey) => {
   if ('doubleDownAllowedMove' in pairChart[pairKey].facing[dealerKey]) {
-    return `${
-      MOVE_TEXT['double_down']
-    } if doubling down is possible, otherwise ${
+    return `${MOVE_TEXT['double_down']} if ${
+      MODIFIER_TEXT['double_down']
+    } is possible, otherwise ${
       MOVE_TEXT[pairChart[pairKey].facing[dealerKey].move]
     }`;
   }
@@ -309,9 +316,9 @@ const getMoveVerboseForPairs = (dealerKey: DealerKey, pairKey: PairKey) => {
   if (
     'doubleDownAfterSplitAllowedMove' in pairChart[pairKey].facing[dealerKey]
   ) {
-    return `${
-      MOVE_TEXT['split']
-    } if doubling down after splits is possible, otherwise ${
+    return `${MOVE_TEXT['split']} if ${
+      MODIFIER_TEXT['double_down_after_split']
+    } is possible, otherwise ${
       MOVE_TEXT[pairChart[pairKey].facing[dealerKey].move]
     }`;
   }
@@ -324,9 +331,9 @@ const getMoveVerboseForSoftHands = (
   softHandKey: SoftHandKey
 ) => {
   if ('doubleDownAllowedMove' in softHandChart[softHandKey].facing[dealerKey]) {
-    return `${
-      MOVE_TEXT['double_down']
-    } if doubling down is possible, otherwise ${
+    return `${MOVE_TEXT['double_down']} if ${
+      MODIFIER_TEXT['double_down']
+    } is possible, otherwise ${
       MOVE_TEXT[softHandChart[softHandKey].facing[dealerKey].move]
     }`;
   }
@@ -341,15 +348,17 @@ const getMoveVerboseForHardHands = (
   hardHandKey: HardHandKey
 ) => {
   if ('doubleDownAllowedMove' in hardHandChart[hardHandKey].facing[dealerKey]) {
-    return `${
-      MOVE_TEXT['double_down']
-    } if doubling down is possible, otherwise ${
+    return `${MOVE_TEXT['double_down']} if ${
+      MODIFIER_TEXT['double_down']
+    } is possible, otherwise ${
       MOVE_TEXT[hardHandChart[hardHandKey].facing[dealerKey].move]
     }`;
   }
 
   if ('surrenderAllowedMove' in hardHandChart[hardHandKey].facing[dealerKey]) {
-    return `${MOVE_TEXT['surrender']} if surrendering is possible, otherwise ${
+    return `${MOVE_TEXT['surrender']} if ${
+      MODIFIER_TEXT['surrender']
+    } is possible, otherwise ${
       MOVE_TEXT[hardHandChart[hardHandKey].facing[dealerKey].move]
     }`;
   }
@@ -390,31 +399,31 @@ const getHandStatsToDisplay = (stats: Stats): HandStatDisplay<HandKey>[] => {
       const isDoubleDownAfterSplitAllowed =
         'doubleDownAfterSplitAllowedMove' in
         pairChart[pairStat.playerHandKey].facing[pairStat.dealerKey];
-
       const hasModifier = isDoubleDownAllowed || isDoubleDownAfterSplitAllowed;
-      const modifier = `when ${
-        isDoubleDownAllowed ? 'doubling down' : 'doubling down after splits'
-      } is ${pairStat.settingType === 'default' ? 'not ' : ''}possible`;
       const correctMove = getMoveForPairs(
         pairStat.settingType === 'double_down_allowed',
         pairStat.settingType === 'double_down_after_split_allowed',
         pairStat.dealerKey,
         pairStat.playerHandKey
       );
-      const correctMoveDetailed = `the correct move is to ${getMoveVerboseForPairs(
-        pairStat.dealerKey,
-        pairStat.playerHandKey
-      )}`;
 
       return {
         ...pairStat,
         handType: 'pair',
         ...(hasModifier && {
-          modifier: modifier,
+          modifier: {
+            type: isDoubleDownAllowed
+              ? 'double_down'
+              : 'double_down_after_split',
+            allowed: pairStat.settingType !== 'default',
+          },
         }),
         correctMove:
           correctMove === 'double_down' ? 'double down' : correctMove,
-        correctMoveDetailed: correctMoveDetailed,
+        correctMoveDetailed: `the correct move is to ${getMoveVerboseForPairs(
+          pairStat.dealerKey,
+          pairStat.playerHandKey
+        )}`,
       };
     }
   );
@@ -426,29 +435,27 @@ const getHandStatsToDisplay = (stats: Stats): HandStatDisplay<HandKey>[] => {
         softHandChart[softHandStat.playerHandKey].facing[
           softHandStat.dealerKey
         ];
-      const modifier = `when doubling down is ${
-        softHandStat.settingType === 'default' ? 'not ' : ''
-      }possible`;
       const correctMove = getMoveForSoftHands(
         softHandStat.settingType === 'double_down_allowed',
         softHandStat.dealerKey,
         softHandStat.playerHandKey
       );
 
-      const correctMoveDetailed = `the correct move is to ${getMoveVerboseForSoftHands(
-        softHandStat.dealerKey,
-        softHandStat.playerHandKey
-      )}`;
-
       return {
         ...softHandStat,
         handType: 'soft_hand',
         ...(hasModifier && {
-          modifier: modifier,
+          modifier: {
+            type: 'double_down',
+            allowed: softHandStat.settingType !== 'default',
+          },
         }),
         correctMove:
           correctMove === 'double_down' ? 'double down' : correctMove,
-        correctMoveDetailed: correctMoveDetailed,
+        correctMoveDetailed: `the correct move is to ${getMoveVerboseForSoftHands(
+          softHandStat.dealerKey,
+          softHandStat.playerHandKey
+        )}`,
       };
     });
 
@@ -464,31 +471,29 @@ const getHandStatsToDisplay = (stats: Stats): HandStatDisplay<HandKey>[] => {
         hardHandChart[hardHandStat.playerHandKey].facing[
           hardHandStat.dealerKey
         ];
-
       const hasModifier = isDoubleDownAllowed || isSurrenderAllowed;
-      const modifier = `when ${
-        isDoubleDownAllowed ? 'doubling down' : 'surrendering'
-      } is ${hardHandStat.settingType === 'default' ? 'not ' : ''}possible`;
       const correctMove = getMoveForHardHands(
         hardHandStat.settingType === 'double_down_allowed',
         hardHandStat.settingType === 'surrender_allowed',
         hardHandStat.dealerKey,
         hardHandStat.playerHandKey
       );
-      const correctMoveDetailed = `the correct move is to ${getMoveVerboseForHardHands(
-        hardHandStat.dealerKey,
-        hardHandStat.playerHandKey
-      )}`;
 
       return {
         ...hardHandStat,
         handType: 'hard_hand',
         ...(hasModifier && {
-          modifier: modifier,
+          modifier: {
+            type: isDoubleDownAllowed ? 'double_down' : 'surrender',
+            allowed: hardHandStat.settingType !== 'default',
+          },
         }),
         correctMove:
           correctMove === 'double_down' ? 'double down' : correctMove,
-        correctMoveDetailed: correctMoveDetailed,
+        correctMoveDetailed: `the correct move is to ${getMoveVerboseForHardHands(
+          hardHandStat.dealerKey,
+          hardHandStat.playerHandKey
+        )}`,
       };
     });
 
@@ -563,6 +568,7 @@ const getHandSettingType = <KeyType extends string>(
 
 export {
   MOVE_TEXT,
+  MODIFIER_TEXT,
   getCards,
   getMove,
   getMoveVerbose,
