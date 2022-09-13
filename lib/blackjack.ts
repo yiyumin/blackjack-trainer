@@ -20,8 +20,16 @@ import {
   Hand,
   HandSettingType,
   ModifierType,
+  ChartMove,
+  Modifier,
 } from '../types';
-import { pairChart, softHandChart, hardHandChart, ChartMap } from '../data';
+import {
+  pairChart,
+  softHandChart,
+  hardHandChart,
+  ChartMap,
+  dealerKeyIndex,
+} from '../data';
 
 const RANK_VALUE: Record<Rank, number> = {
   '2': 2,
@@ -53,6 +61,7 @@ const MODIFIER_TEXT: Record<ModifierType, string> = {
   surrender: 'surrendering',
 };
 
+// returns a random integer in range [floor, ceiling).
 const getRandomInteger = (ceiling: number, floor: number = 0): number =>
   Math.floor(Math.random() * (ceiling - floor) + floor);
 
@@ -201,47 +210,43 @@ const convertToSimpleRank = (rank: Rank): SimpleRank => {
   return rank as SimpleRank;
 };
 
-const getMoveForPairs = (
+const convertChartMoveToMove = (
+  chartMove: ChartMove,
   isDoubleDownAllowed: boolean,
   isDoubleDownAfterSplitAllowed: boolean,
-  dealerKey: DealerKey,
-  pairKey: PairKey
+  isSurrenderAllowed: boolean
 ): Move => {
-  return (
-    (isDoubleDownAllowed &&
-      pairChart[pairKey].facing[dealerKey].doubleDownAllowedMove) ||
-    (isDoubleDownAfterSplitAllowed &&
-      pairChart[pairKey].facing[dealerKey].doubleDownAfterSplitAllowedMove) ||
-    pairChart[pairKey].facing[dealerKey].move
-  );
+  switch (chartMove) {
+    case 'H':
+      return 'hit';
+    case 'S':
+      return 'stand';
+    case 'Dh':
+      return isDoubleDownAllowed ? 'double_down' : 'hit';
+    case 'Ds':
+      return isDoubleDownAllowed ? 'double_down' : 'stand';
+    case 'P':
+      return 'split';
+    case 'Ph':
+      return isDoubleDownAfterSplitAllowed ? 'split' : 'hit';
+    case 'Pd':
+      return isDoubleDownAfterSplitAllowed ? 'split' : 'double_down';
+    case 'Rh':
+      return isSurrenderAllowed ? 'surrender' : 'hit';
+    case 'Rs':
+      return isSurrenderAllowed ? 'surrender' : 'stand';
+    case 'Rp':
+      return isSurrenderAllowed ? 'surrender' : 'split';
+    default:
+      throw new Error(`${chartMove} is not a valid chart move.`);
+  }
 };
 
-const getMoveForSoftHands = (
-  isDoubleDownAllowed: boolean,
+const getChartMove = <KeyType extends string>(
+  chart: ChartMap<KeyType>,
   dealerKey: DealerKey,
-  softHandKey: SoftHandKey
-): Move => {
-  return (
-    (isDoubleDownAllowed &&
-      softHandChart[softHandKey].facing[dealerKey].doubleDownAllowedMove) ||
-    softHandChart[softHandKey].facing[dealerKey].move
-  );
-};
-
-const getMoveForHardHands = (
-  isDoubleDownAllowed: boolean,
-  isSurrenderAllowed: boolean,
-  dealerKey: DealerKey,
-  hardHandKey: HardHandKey
-): Move => {
-  return (
-    (isDoubleDownAllowed &&
-      hardHandChart[hardHandKey].facing[dealerKey].doubleDownAllowedMove) ||
-    (isSurrenderAllowed &&
-      hardHandChart[hardHandKey].facing[dealerKey].surrenderAllowedMove) ||
-    hardHandChart[hardHandKey].facing[dealerKey].move
-  );
-};
+  handKey: KeyType
+) => chart[handKey][dealerKeyIndex[dealerKey]];
 
 const getHandTotalValue = (rank1: Rank, rank2: Rank): number => {
   return RANK_VALUE[rank1] + RANK_VALUE[rank2];
@@ -280,149 +285,159 @@ const getMove = (
   const dealerRank = convertToSimpleRank(hand.dealerCard.rank);
 
   if (hand.playerCard1.rank === hand.playerCard2.rank) {
-    return getMoveForPairs(
+    return convertChartMoveToMove(
+      getChartMove(pairChart, dealerRank, rank1),
       isDoubleDownAllowed,
       isDoubleDownAfterSplitAllowed,
-      dealerRank,
-      rank1
+      isSurrenderAllowed
     );
   }
 
   if (rank1 === 'A' || rank2 === 'A') {
-    return getMoveForSoftHands(
+    return convertChartMoveToMove(
+      getChartMove(
+        softHandChart,
+        dealerRank,
+        (rank1 === 'A' ? rank2 : rank1) as SoftHandKey // guaranteed not to be an A since the hand cannot be a pair or of value 10 since blackjack's aren't dealt
+      ),
       isDoubleDownAllowed,
-      dealerRank,
-      (rank1 === 'A' ? rank2 : rank1) as SoftHandKey // guaranteed not to be an A since the hand cannot be a pair or of value 10 since blackjack's aren't dealt
+      isDoubleDownAfterSplitAllowed,
+      isSurrenderAllowed
     );
   }
 
-  return getMoveForHardHands(
+  return convertChartMoveToMove(
+    getChartMove(
+      hardHandChart,
+      dealerRank,
+      convertHardHandTotalValueToKey(getHandTotalValue(rank1, rank2))
+    ),
     isDoubleDownAllowed,
-    isSurrenderAllowed,
-    dealerRank,
-    convertHardHandTotalValueToKey(getHandTotalValue(rank1, rank2))
+    isDoubleDownAfterSplitAllowed,
+    isSurrenderAllowed
   );
 };
 
-const getMoveVerboseForPairs = (dealerKey: DealerKey, pairKey: PairKey) => {
-  if ('doubleDownAllowedMove' in pairChart[pairKey].facing[dealerKey]) {
-    return `${MOVE_TEXT['double_down']} if ${
-      MODIFIER_TEXT['double_down']
-    } is possible, otherwise ${
-      MOVE_TEXT[pairChart[pairKey].facing[dealerKey].move]
-    }`;
+const getMoveVerboseForChartMove = (chartMove: ChartMove): string => {
+  switch (chartMove) {
+    case 'H':
+      return 'always hit';
+    case 'S':
+      return 'always stand';
+    case 'Dh':
+      return 'double down if doubling down is possible, otherwise hit';
+    case 'Ds':
+      return 'double down if doubling down is possible, otherwise stand';
+    case 'P':
+      return 'always split';
+    case 'Ph':
+      return 'split if doubling down after splits is possible, otherwise hit';
+    case 'Pd':
+      return 'split if doubling down after splits is possible, otherwise double down';
+    case 'Rh':
+      return 'surrender if surrendering is possible, otherwise hit';
+    case 'Rs':
+      return 'surrender if surrendering is possible, otherwise stand';
+    case 'Rp':
+      return 'surrender if surrendering is possible, otherwise split';
+    default:
+      throw new Error(`${chartMove} is not a valid chart move.`);
   }
-
-  if (
-    'doubleDownAfterSplitAllowedMove' in pairChart[pairKey].facing[dealerKey]
-  ) {
-    return `${MOVE_TEXT['split']} if ${
-      MODIFIER_TEXT['double_down_after_split']
-    } is possible, otherwise ${
-      MOVE_TEXT[pairChart[pairKey].facing[dealerKey].move]
-    }`;
-  }
-
-  return `always ${MOVE_TEXT[pairChart[pairKey].facing[dealerKey].move]}`;
 };
 
-const getMoveVerboseForSoftHands = (
-  dealerKey: DealerKey,
-  softHandKey: SoftHandKey
-) => {
-  if ('doubleDownAllowedMove' in softHandChart[softHandKey].facing[dealerKey]) {
-    return `${MOVE_TEXT['double_down']} if ${
-      MODIFIER_TEXT['double_down']
-    } is possible, otherwise ${
-      MOVE_TEXT[softHandChart[softHandKey].facing[dealerKey].move]
-    }`;
-  }
-
-  return `always ${
-    MOVE_TEXT[softHandChart[softHandKey].facing[dealerKey].move]
-  }`;
-};
-
-const getMoveVerboseForHardHands = (
-  dealerKey: DealerKey,
-  hardHandKey: HardHandKey
-) => {
-  if ('doubleDownAllowedMove' in hardHandChart[hardHandKey].facing[dealerKey]) {
-    return `${MOVE_TEXT['double_down']} if ${
-      MODIFIER_TEXT['double_down']
-    } is possible, otherwise ${
-      MOVE_TEXT[hardHandChart[hardHandKey].facing[dealerKey].move]
-    }`;
-  }
-
-  if ('surrenderAllowedMove' in hardHandChart[hardHandKey].facing[dealerKey]) {
-    return `${MOVE_TEXT['surrender']} if ${
-      MODIFIER_TEXT['surrender']
-    } is possible, otherwise ${
-      MOVE_TEXT[hardHandChart[hardHandKey].facing[dealerKey].move]
-    }`;
-  }
-
-  return `always ${
-    MOVE_TEXT[hardHandChart[hardHandKey].facing[dealerKey].move]
-  }`;
-};
-
-const getMoveVerbose = (hand: Hand) => {
+const getMoveVerbose = (hand: Hand): string => {
   const rank1 = convertToSimpleRank(hand.playerCard1.rank);
   const rank2 = convertToSimpleRank(hand.playerCard2.rank);
   const dealerRank = convertToSimpleRank(hand.dealerCard.rank);
 
   if (hand.playerCard1.rank === hand.playerCard2.rank) {
-    return getMoveVerboseForPairs(dealerRank, rank1);
-  }
-
-  if (rank1 === 'A' || rank2 === 'A') {
-    return getMoveVerboseForSoftHands(
-      dealerRank,
-      (rank1 === 'A' ? rank2 : rank1) as SoftHandKey // guaranteed not to be an A since the hand cannot be a pair or of value 10 since blackjack's aren't dealt
+    return getMoveVerboseForChartMove(
+      getChartMove(pairChart, dealerRank, rank1)
     );
   }
 
-  return getMoveVerboseForHardHands(
-    dealerRank,
-    convertHardHandTotalValueToKey(getHandTotalValue(rank1, rank2))
+  if (rank1 === 'A' || rank2 === 'A') {
+    return getMoveVerboseForChartMove(
+      getChartMove(
+        softHandChart,
+        dealerRank,
+        (rank1 === 'A' ? rank2 : rank1) as SoftHandKey // guaranteed not to be an A since the hand cannot be a pair or of value 10 since blackjack's aren't dealt
+      )
+    );
+  }
+
+  return getMoveVerboseForChartMove(
+    getChartMove(
+      hardHandChart,
+      dealerRank,
+      convertHardHandTotalValueToKey(getHandTotalValue(rank1, rank2))
+    )
   );
+};
+
+const getModifierForChartMove = (
+  chartMove: ChartMove,
+  isDoubleDownAllowed: boolean,
+  isDoubleDownAfterSplitAllowed: boolean,
+  isSurrenderAllowed: boolean
+): Modifier | undefined => {
+  switch (chartMove) {
+    case 'H':
+    case 'S':
+    case 'P':
+      return undefined;
+    case 'Dh':
+    case 'Ds':
+      return {
+        type: 'double_down',
+        allowed: isDoubleDownAllowed,
+      };
+    case 'Ph':
+    case 'Pd':
+      return {
+        type: 'double_down_after_split',
+        allowed: isDoubleDownAfterSplitAllowed,
+      };
+    case 'Rh':
+    case 'Rs':
+    case 'Rp':
+      return {
+        type: 'surrender',
+        allowed: isSurrenderAllowed,
+      };
+    default:
+      throw new Error(`${chartMove} is not a valid chart move.`);
+  }
 };
 
 const getHandStatsToDisplay = (stats: Stats): HandStatDisplay<HandKey>[] => {
   const readablePairStats: HandStatDisplay<PairKey>[] = stats.pairs.map(
     (pairStat) => {
-      const isDoubleDownAllowed =
-        'doubleDownAllowedMove' in
-        pairChart[pairStat.playerHandKey].facing[pairStat.dealerKey];
-      const isDoubleDownAfterSplitAllowed =
-        'doubleDownAfterSplitAllowedMove' in
-        pairChart[pairStat.playerHandKey].facing[pairStat.dealerKey];
-      const hasModifier = isDoubleDownAllowed || isDoubleDownAfterSplitAllowed;
-      const correctMove = getMoveForPairs(
-        pairStat.settingType === 'double_down_allowed',
-        pairStat.settingType === 'double_down_after_split_allowed',
+      const chartMove = getChartMove(
+        pairChart,
         pairStat.dealerKey,
         pairStat.playerHandKey
+      );
+      const correctMove = convertChartMoveToMove(
+        chartMove,
+        pairStat.settingType === 'double_down_allowed',
+        pairStat.settingType === 'double_down_after_split_allowed',
+        pairStat.settingType === 'surrender_allowed'
       );
 
       return {
         ...pairStat,
         handType: 'pair',
-        ...(hasModifier && {
-          modifier: {
-            type: isDoubleDownAllowed
-              ? 'double_down'
-              : 'double_down_after_split',
-            allowed: pairStat.settingType !== 'default',
-          },
-        }),
+        modifier: getModifierForChartMove(
+          chartMove,
+          pairStat.settingType === 'double_down_allowed',
+          pairStat.settingType === 'double_down_after_split_allowed',
+          pairStat.settingType === 'surrender_allowed'
+        ),
         correctMove:
           correctMove === 'double_down' ? 'double down' : correctMove,
-        correctMoveDetailed: `the correct move is to ${getMoveVerboseForPairs(
-          pairStat.dealerKey,
-          pairStat.playerHandKey
+        correctMoveDetailed: `the correct move is to ${getMoveVerboseForChartMove(
+          chartMove
         )}`,
       };
     }
@@ -430,69 +445,62 @@ const getHandStatsToDisplay = (stats: Stats): HandStatDisplay<HandKey>[] => {
 
   const readableSoftHandStats: HandStatDisplay<SoftHandKey>[] =
     stats.softHands.map((softHandStat) => {
-      const hasModifier =
-        'doubleDownAllowedMove' in
-        softHandChart[softHandStat.playerHandKey].facing[
-          softHandStat.dealerKey
-        ];
-      const correctMove = getMoveForSoftHands(
-        softHandStat.settingType === 'double_down_allowed',
+      const chartMove = getChartMove(
+        softHandChart,
         softHandStat.dealerKey,
         softHandStat.playerHandKey
+      );
+      const correctMove = convertChartMoveToMove(
+        chartMove,
+        softHandStat.settingType === 'double_down_allowed',
+        softHandStat.settingType === 'double_down_after_split_allowed',
+        softHandStat.settingType === 'surrender_allowed'
       );
 
       return {
         ...softHandStat,
         handType: 'soft_hand',
-        ...(hasModifier && {
-          modifier: {
-            type: 'double_down',
-            allowed: softHandStat.settingType !== 'default',
-          },
-        }),
+        modifier: getModifierForChartMove(
+          chartMove,
+          softHandStat.settingType === 'double_down_allowed',
+          softHandStat.settingType === 'double_down_after_split_allowed',
+          softHandStat.settingType === 'surrender_allowed'
+        ),
         correctMove:
           correctMove === 'double_down' ? 'double down' : correctMove,
-        correctMoveDetailed: `the correct move is to ${getMoveVerboseForSoftHands(
-          softHandStat.dealerKey,
-          softHandStat.playerHandKey
+        correctMoveDetailed: `the correct move is to ${getMoveVerboseForChartMove(
+          chartMove
         )}`,
       };
     });
 
   const readableHardHandStats: HandStatDisplay<HardHandKey>[] =
     stats.hardHands.map((hardHandStat) => {
-      const isDoubleDownAllowed =
-        'doubleDownAllowedMove' in
-        hardHandChart[hardHandStat.playerHandKey].facing[
-          hardHandStat.dealerKey
-        ];
-      const isSurrenderAllowed =
-        'surrenderAllowedMove' in
-        hardHandChart[hardHandStat.playerHandKey].facing[
-          hardHandStat.dealerKey
-        ];
-      const hasModifier = isDoubleDownAllowed || isSurrenderAllowed;
-      const correctMove = getMoveForHardHands(
-        hardHandStat.settingType === 'double_down_allowed',
-        hardHandStat.settingType === 'surrender_allowed',
+      const chartMove = getChartMove(
+        hardHandChart,
         hardHandStat.dealerKey,
         hardHandStat.playerHandKey
+      );
+      const correctMove = convertChartMoveToMove(
+        chartMove,
+        hardHandStat.settingType === 'double_down_allowed',
+        hardHandStat.settingType === 'double_down_after_split_allowed',
+        hardHandStat.settingType === 'surrender_allowed'
       );
 
       return {
         ...hardHandStat,
         handType: 'hard_hand',
-        ...(hasModifier && {
-          modifier: {
-            type: isDoubleDownAllowed ? 'double_down' : 'surrender',
-            allowed: hardHandStat.settingType !== 'default',
-          },
-        }),
+        modifier: getModifierForChartMove(
+          chartMove,
+          hardHandStat.settingType === 'double_down_allowed',
+          hardHandStat.settingType === 'double_down_after_split_allowed',
+          hardHandStat.settingType === 'surrender_allowed'
+        ),
         correctMove:
           correctMove === 'double_down' ? 'double down' : correctMove,
-        correctMoveDetailed: `the correct move is to ${getMoveVerboseForHardHands(
-          hardHandStat.dealerKey,
-          hardHandStat.playerHandKey
+        correctMoveDetailed: `the correct move is to ${getMoveVerboseForChartMove(
+          chartMove
         )}`,
       };
     });
@@ -542,28 +550,28 @@ const getHandSettingType = <KeyType extends string>(
   isDoubleDownAfterSplitAllowed: boolean,
   isSurrenderAllowed: boolean
 ): HandSettingType => {
-  if (
-    isDoubleDownAllowed &&
-    'doubleDownAllowedMove' in chart[playerKey].facing[dealerKey]
-  ) {
-    return 'double_down_allowed';
-  }
+  const chartMove = getChartMove(chart, dealerKey, playerKey);
 
-  if (
-    isDoubleDownAfterSplitAllowed &&
-    'doubleDownAfterSplitAllowedMove' in chart[playerKey].facing[dealerKey]
-  ) {
-    return 'double_down_after_split_allowed';
+  switch (chartMove) {
+    case 'H':
+    case 'S':
+    case 'P':
+      return 'default';
+    case 'Dh':
+    case 'Ds':
+      return isDoubleDownAllowed ? 'double_down_allowed' : 'default';
+    case 'Ph':
+    case 'Pd':
+      return isDoubleDownAfterSplitAllowed
+        ? 'double_down_after_split_allowed'
+        : 'default';
+    case 'Rh':
+    case 'Rs':
+    case 'Rp':
+      return isSurrenderAllowed ? 'surrender_allowed' : 'default';
+    default:
+      throw new Error(`${chartMove} is not a valid chart move.`);
   }
-
-  if (
-    isSurrenderAllowed &&
-    'surrenderAllowedMove' in chart[playerKey].facing[dealerKey]
-  ) {
-    return 'surrender_allowed';
-  }
-
-  return 'default';
 };
 
 export {

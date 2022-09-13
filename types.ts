@@ -31,6 +31,18 @@ type Hand = {
 
 type Move = 'hit' | 'stand' | 'double_down' | 'split' | 'surrender';
 
+type ChartMove =
+  | 'H'
+  | 'S'
+  | 'Dh'
+  | 'Ds'
+  | 'P'
+  | 'Ph'
+  | 'Pd'
+  | 'Rh'
+  | 'Rs'
+  | 'Rp';
+
 type Stats = {
   pairs: HandStat<PairKey>[];
   softHands: HandStat<SoftHandKey>[];
@@ -120,6 +132,7 @@ export type {
   Card,
   Hand,
   Move,
+  ChartMove,
   Stats,
   HandSettingType,
   HandStat,
