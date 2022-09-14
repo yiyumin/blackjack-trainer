@@ -19,7 +19,7 @@ import {
 import {
   DealerKey,
   HandKey,
-  HandSettingType,
+  Modifier,
   HandStatDisplay,
   HandType,
   HeroIcon,
@@ -47,9 +47,9 @@ type StatisticsTableProps = {
   handTypeFilter?: HandType;
   resetHandStat: (
     handType: HandType,
-    handSettingType: HandSettingType,
     playerHandKey: HandKey,
-    dealerKey: DealerKey
+    dealerKey: DealerKey,
+    modifier?: Modifier
   ) => void;
   resetAllHandStatsOfHandType: (handType?: HandType) => void;
 };
@@ -132,15 +132,17 @@ const StatisticsTable = ({
                   handsPlayedCorrect={timesCorrect}
                 />
                 <div className='absolute right-5 top-1/2 -translate-y-1/2'>
-                  <ConfirmationPopover
-                    openPopoverElement={
-                      <TrashIcon className='h-8 w-8 stroke-[#878a8c]' />
-                    }
-                    message='Are you sure you want reset all currently hands displayed?'
-                    onConfirm={() =>
-                      resetAllHandStatsOfHandType(state.globalFilter)
-                    }
-                  />
+                  {timesSeen !== 0 && (
+                    <ConfirmationPopover
+                      openPopoverElement={
+                        <TrashIcon className='h-8 w-8 stroke-[#878a8c]' />
+                      }
+                      message='Are you sure you want reset all currently hands displayed?'
+                      onConfirm={() =>
+                        resetAllHandStatsOfHandType(state.globalFilter)
+                      }
+                    />
+                  )}
                 </div>
               </div>
             );
@@ -148,7 +150,7 @@ const StatisticsTable = ({
           columns: [
             {
               Header: 'Player Hand',
-              id: 'playerCardLabel',
+              id: 'playerHand',
               accessor: (row) =>
                 getHandFriendlyName(row.handType, row.playerHandKey),
               Cell: ({
@@ -228,9 +230,9 @@ const StatisticsTable = ({
                   onConfirm={() =>
                     resetHandStat(
                       row.original.handType,
-                      row.original.settingType,
                       row.original.playerHandKey,
-                      row.original.dealerKey
+                      row.original.dealerKey,
+                      row.original.modifier
                     )
                   }
                 />
@@ -272,7 +274,11 @@ const StatisticsTable = ({
                 <th
                   {...column.getHeaderProps(column.getSortByToggleProps())}
                   key={columnIdx}
-                  className='overflow-hidden text-ellipsis p-0 text-xs font-normal md:text-sm md:font-bold'
+                  className={`p-0 ${
+                    column.id !== 'headerStat_0'
+                      ? 'overflow-hidden text-ellipsis text-xs font-normal md:text-sm md:font-bold'
+                      : ''
+                  }`}
                 >
                   {column.render('Header')}
 

@@ -49,12 +49,6 @@ type Stats = {
   hardHands: HandStat<HardHandKey>[];
 };
 
-type HandSettingType =
-  | 'default'
-  | 'double_down_allowed'
-  | 'double_down_after_split_allowed'
-  | 'surrender_allowed';
-
 const simpleRanks = [
   '2',
   '3',
@@ -96,7 +90,7 @@ type HandKey = SimpleRank | HardHandKey;
 type HandStat<KeyType extends string> = {
   playerHandKey: KeyType;
   dealerKey: DealerKey;
-  settingType: HandSettingType;
+  modifier?: Modifier;
   timesSeen: number;
   timesCorrect: number;
 };
@@ -134,7 +128,6 @@ export type {
   Move,
   ChartMove,
   Stats,
-  HandSettingType,
   HandStat,
   HandType,
   HandStatDisplay,

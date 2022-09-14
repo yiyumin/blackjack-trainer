@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { DealerKey, HandKey, HandSettingType, HandType, Stats } from '../types';
+import { DealerKey, HandKey, Modifier, HandType, Stats } from '../types';
 import StatisticsTable from './StatisticsTable';
 import StatisticsFilter from './StatisticsFilter';
 import ModifierLegend from './ModifierLegend';
@@ -9,9 +9,9 @@ type StatisticsProps = {
   stats: Stats;
   resetHandStat: (
     handType: HandType,
-    handSettingType: HandSettingType,
     playerHandKey: HandKey,
-    dealerKey: DealerKey
+    dealerKey: DealerKey,
+    modifier?: Modifier
   ) => void;
   resetAllHandStatsOfHandType: (handType?: HandType) => void;
 };

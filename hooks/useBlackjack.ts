@@ -4,8 +4,9 @@ import {
   DealerKey,
   Hand,
   HandKey,
-  HandSettingType,
+  // HandSettingType,
   HandType,
+  Modifier,
   Move,
   PracticeType,
   Rank,
@@ -16,8 +17,9 @@ import {
   convertHardHandTotalValueToKey,
   convertToSimpleRank,
   getCards,
-  getHandSettingType,
+  // getHandSettingType,
   getHandTotalValue,
+  getModifier,
   getMove,
   getMoveVerbose,
 } from '../lib/blackjack';
@@ -70,7 +72,7 @@ const useBlackjack = () => {
 
       if (rank1 === rank2) {
         const pairKey = convertToSimpleRank(rank1);
-        const handSettingType = getHandSettingType(
+        const modifier = getModifier(
           pairChart,
           pairKey,
           dealerKey,
@@ -84,7 +86,11 @@ const useBlackjack = () => {
             (handStat) =>
               handStat.playerHandKey === pairKey &&
               handStat.dealerKey === dealerKey &&
-              handStat.settingType === handSettingType
+              ((handStat.modifier === undefined && modifier === undefined) ||
+                (handStat.modifier !== undefined &&
+                  modifier !== undefined &&
+                  handStat.modifier.type === modifier.type &&
+                  handStat.modifier.allowed === modifier.allowed))
           );
 
           if (recordExists) {
@@ -93,7 +99,11 @@ const useBlackjack = () => {
               pairs: prevStats.pairs.map((handStat) =>
                 handStat.playerHandKey === pairKey &&
                 handStat.dealerKey === dealerKey &&
-                handStat.settingType === handSettingType
+                ((handStat.modifier === undefined && modifier === undefined) ||
+                  (handStat.modifier !== undefined &&
+                    modifier !== undefined &&
+                    handStat.modifier.type === modifier.type &&
+                    handStat.modifier.allowed === modifier.allowed))
                   ? {
                       ...handStat,
                       timesSeen: handStat.timesSeen + 1,
@@ -109,8 +119,8 @@ const useBlackjack = () => {
                 ...prevStats.pairs,
                 {
                   playerHandKey: pairKey,
-                  dealerKey: dealerKey,
-                  settingType: handSettingType,
+                  dealerKey,
+                  modifier,
                   timesSeen: 1,
                   timesCorrect: isCorrect ? 1 : 0,
                 },
@@ -120,7 +130,7 @@ const useBlackjack = () => {
         });
       } else if (rank1 === 'A' || rank2 === 'A') {
         const softHandKey = (rank1 === 'A' ? rank2 : rank1) as SoftHandKey; // guaranteed not to be an A since the hand cannot be a pair or of value 10 since blackjack's aren't dealt
-        const handSettingType = getHandSettingType(
+        const modifier = getModifier(
           softHandChart,
           softHandKey,
           dealerKey,
@@ -134,7 +144,11 @@ const useBlackjack = () => {
             (handStat) =>
               handStat.playerHandKey === softHandKey &&
               handStat.dealerKey === dealerKey &&
-              handStat.settingType === handSettingType
+              ((handStat.modifier === undefined && modifier === undefined) ||
+                (handStat.modifier !== undefined &&
+                  modifier !== undefined &&
+                  handStat.modifier.type === modifier.type &&
+                  handStat.modifier.allowed === modifier.allowed))
           );
 
           if (recordExists) {
@@ -143,7 +157,11 @@ const useBlackjack = () => {
               softHands: prevStats.softHands.map((handStat) =>
                 handStat.playerHandKey === softHandKey &&
                 handStat.dealerKey === dealerKey &&
-                handStat.settingType === handSettingType
+                ((handStat.modifier === undefined && modifier === undefined) ||
+                  (handStat.modifier !== undefined &&
+                    modifier !== undefined &&
+                    handStat.modifier.type === modifier.type &&
+                    handStat.modifier.allowed === modifier.allowed))
                   ? {
                       ...handStat,
                       timesSeen: handStat.timesSeen + 1,
@@ -159,8 +177,8 @@ const useBlackjack = () => {
                 ...prevStats.softHands,
                 {
                   playerHandKey: softHandKey,
-                  dealerKey: dealerKey,
-                  settingType: handSettingType,
+                  dealerKey,
+                  modifier,
                   timesSeen: 1,
                   timesCorrect: isCorrect ? 1 : 0,
                 },
@@ -172,7 +190,7 @@ const useBlackjack = () => {
         const hardHandKey = convertHardHandTotalValueToKey(
           getHandTotalValue(rank1, rank2)
         );
-        const handSettingType = getHandSettingType(
+        const modifier = getModifier(
           hardHandChart,
           hardHandKey,
           dealerKey,
@@ -186,7 +204,11 @@ const useBlackjack = () => {
             (handStat) =>
               handStat.playerHandKey === hardHandKey &&
               handStat.dealerKey === dealerKey &&
-              handStat.settingType === handSettingType
+              ((handStat.modifier === undefined && modifier === undefined) ||
+                (handStat.modifier !== undefined &&
+                  modifier !== undefined &&
+                  handStat.modifier.type === modifier.type &&
+                  handStat.modifier.allowed === modifier.allowed))
           );
 
           if (recordExists) {
@@ -195,7 +217,11 @@ const useBlackjack = () => {
               hardHands: prevStats.hardHands.map((handStat) =>
                 handStat.playerHandKey === hardHandKey &&
                 handStat.dealerKey === dealerKey &&
-                handStat.settingType === handSettingType
+                ((handStat.modifier === undefined && modifier === undefined) ||
+                  (handStat.modifier !== undefined &&
+                    modifier !== undefined &&
+                    handStat.modifier.type === modifier.type &&
+                    handStat.modifier.allowed === modifier.allowed))
                   ? {
                       ...handStat,
                       timesSeen: handStat.timesSeen + 1,
@@ -211,8 +237,8 @@ const useBlackjack = () => {
                 ...prevStats.hardHands,
                 {
                   playerHandKey: hardHandKey,
-                  dealerKey: dealerKey,
-                  settingType: handSettingType,
+                  dealerKey,
+                  modifier,
                   timesSeen: 1,
                   timesCorrect: isCorrect ? 1 : 0,
                 },
@@ -275,9 +301,9 @@ const useBlackjack = () => {
   const resetHandStat = useCallback(
     (
       handType: HandType,
-      handSettingType: HandSettingType,
       playerHandKey: HandKey,
-      dealerKey: DealerKey
+      dealerKey: DealerKey,
+      modifier?: Modifier
     ) => {
       if (handType === 'pair') {
         setStats((prevStats) => ({
@@ -286,7 +312,12 @@ const useBlackjack = () => {
             (pair) =>
               pair.playerHandKey !== playerHandKey ||
               pair.dealerKey !== dealerKey ||
-              pair.settingType !== handSettingType
+              (pair.modifier === undefined && modifier !== undefined) ||
+              (pair.modifier !== undefined && modifier === undefined) ||
+              (pair.modifier !== undefined &&
+                modifier !== undefined &&
+                (pair.modifier.type !== modifier.type ||
+                  pair.modifier.allowed !== modifier.allowed))
           ),
         }));
       } else if (handType === 'soft_hand') {
@@ -296,7 +327,12 @@ const useBlackjack = () => {
             (softHand) =>
               softHand.playerHandKey !== playerHandKey ||
               softHand.dealerKey !== dealerKey ||
-              softHand.settingType !== handSettingType
+              (softHand.modifier === undefined && modifier !== undefined) ||
+              (softHand.modifier !== undefined && modifier === undefined) ||
+              (softHand.modifier !== undefined &&
+                modifier !== undefined &&
+                (softHand.modifier.type !== modifier.type ||
+                  softHand.modifier.allowed !== modifier.allowed))
           ),
         }));
       } else {
@@ -306,7 +342,12 @@ const useBlackjack = () => {
             (hardHands) =>
               hardHands.playerHandKey !== playerHandKey ||
               hardHands.dealerKey !== dealerKey ||
-              hardHands.settingType !== handSettingType
+              (hardHands.modifier === undefined && modifier !== undefined) ||
+              (hardHands.modifier !== undefined && modifier === undefined) ||
+              (hardHands.modifier !== undefined &&
+                modifier !== undefined &&
+                (hardHands.modifier.type !== modifier.type ||
+                  hardHands.modifier.allowed !== modifier.allowed))
           ),
         }));
       }
