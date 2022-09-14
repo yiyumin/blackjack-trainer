@@ -268,48 +268,58 @@ const StatisticsTable = ({
     <div className='h-[55vh] w-full space-y-1 overflow-y-auto px-1 md:h-[60vh]'>
       <table {...getTableProps()} className='w-full'>
         <thead className='sticky top-0 z-20 bg-slate-500'>
-          {headerGroups.map((headerGroup, headerGroupIdx) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={headerGroupIdx}>
-              {headerGroup.headers.map((column, columnIdx) => (
-                <th
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
-                  key={columnIdx}
-                  className={`p-0 ${
-                    column.id !== 'headerStat_0'
-                      ? 'overflow-hidden text-ellipsis text-xs font-normal md:text-sm md:font-bold'
-                      : ''
-                  }`}
-                >
-                  {column.render('Header')}
+          {headerGroups.map((headerGroup) => {
+            const { key, ...restHeaderGroupProps } =
+              headerGroup.getHeaderGroupProps();
+            return (
+              <tr key={key} {...restHeaderGroupProps}>
+                {headerGroup.headers.map((column) => {
+                  const { key, ...restColumn } = column.getHeaderProps(
+                    column.getSortByToggleProps()
+                  );
+                  return (
+                    <th
+                      key={key}
+                      {...restColumn}
+                      className={`p-0 ${
+                        column.id !== 'headerStat_0'
+                          ? 'overflow-hidden text-ellipsis text-xs font-normal md:text-sm md:font-bold'
+                          : ''
+                      }`}
+                    >
+                      {column.render('Header')}
 
-                  <span className='text-xs'>
-                    {column.isSorted
-                      ? column.isSortedDesc
-                        ? ' 🔽'
-                        : ' 🔼'
-                      : ''}
-                  </span>
-                </th>
-              ))}
-            </tr>
-          ))}
+                      <span className='text-xs'>
+                        {column.isSorted
+                          ? column.isSortedDesc
+                            ? ' 🔽'
+                            : ' 🔼'
+                          : ''}
+                      </span>
+                    </th>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </thead>
         <tbody {...getTableBodyProps()}>
           {rows.length > 0 ? (
-            rows.map((row, rowIdx) => {
+            rows.map((row) => {
               prepareRow(row);
-
+              const { key, ...restRowProps } = row.getRowProps();
               return (
                 <tr
-                  {...row.getRowProps()}
-                  key={rowIdx}
+                  key={key}
+                  {...restRowProps}
                   className='bg-black text-center'
                 >
-                  {row.cells.map((cell, cellIdx) => {
+                  {row.cells.map((cell) => {
+                    const { key, ...restCellProps } = cell.getCellProps();
                     return (
                       <td
-                        {...cell.getCellProps()}
-                        key={cellIdx}
+                        key={key}
+                        {...restCellProps}
                         className='border border-slate-700 text-xs md:text-base'
                       >
                         {cell.render('Cell')}

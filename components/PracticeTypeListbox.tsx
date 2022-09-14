@@ -1,3 +1,4 @@
+import React from 'react';
 import { Listbox } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
 
@@ -52,7 +53,7 @@ const PracticeTypeListbox = ({
           optionType='all'
         />
         {handTypes.map((handType) => (
-          <>
+          <React.Fragment key={handType}>
             <PracticeTypeListboxOption
               value={
                 selectedPracticeType?.handType == handType &&
@@ -63,19 +64,19 @@ const PracticeTypeListbox = ({
               name={getHandFriendlyName(handType)}
               optionType='hand_type'
             />
-            {handTypeToKeys[handType].map((key) => (
+            {handTypeToKeys[handType].map((handKey) => (
               <PracticeTypeListboxOption
-                key={key}
+                key={handKey}
                 value={
                   selectedPracticeType?.handType == handType &&
-                  selectedPracticeType.handKey == key
+                  selectedPracticeType.handKey == handKey
                     ? selectedPracticeType
-                    : { handType, handKey: key }
+                    : { handType, handKey }
                 }
-                name={getHandFriendlyName(handType, key)}
+                name={getHandFriendlyName(handType, handKey)}
               />
             ))}
-          </>
+          </React.Fragment>
         ))}
       </Listbox.Options>
     </Listbox>
