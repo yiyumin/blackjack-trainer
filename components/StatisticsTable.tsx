@@ -1,28 +1,29 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Column,
-  useTable,
-  useFlexLayout,
-  useSortBy,
-  useGlobalFilter,
-  Row,
-} from 'react-table';
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  RowData,
+  SortingState,
+  useReactTable,
+} from '@tanstack/react-table';
 import { Popover } from '@headlessui/react';
-import { TrashIcon } from '@heroicons/react/outline';
-
 import {
   ChevronDoubleDownIcon,
   ScissorsIcon,
   FlagIcon,
 } from '@heroicons/react/solid';
+import { TrashIcon } from '@heroicons/react/outline';
 
 import {
   DealerKey,
   HandKey,
-  Modifier,
   HandStatDisplay,
   HandType,
   HeroIcon,
+  Modifier,
   ModifierType,
   Stats,
 } from '../types';
@@ -31,16 +32,160 @@ import {
   getHandStatsToDisplay,
   MODIFIER_TEXT,
 } from '../lib/blackjack';
-
-import StatisticsOverall from './StatisticsOverall';
-import ConfirmationPopover from './ConfirmationPopover';
 import ModifierIcon from './ModifierIcon';
+import ConfirmationPopover from './ConfirmationPopover';
+import StatisticsOverall from './StatisticsOverall';
+
+declare module '@tanstack/react-table' {
+  interface TableMeta<TData extends RowData> {
+    deleteRow: (
+      handType: HandType,
+      playerHandKey: HandKey,
+      dealerKey: DealerKey,
+      modifier?: Modifier
+    ) => void;
+
+    deleteCurrentRows: () => void;
+  }
+}
 
 const MODIFIER_ICON: Record<ModifierType, HeroIcon> = {
   double_down: ChevronDoubleDownIcon,
   double_down_after_split: ScissorsIcon,
   surrender: FlagIcon,
 };
+
+const columnHelper = createColumnHelper<HandStatDisplay<HandKey>>();
+
+const columns = [
+  columnHelper.group({
+    id: 'headerStat',
+    header: ({ table }) => {
+      const { timesCorrect, timesSeen } = table.getRowModel().rows.reduce(
+        (curr, row) => {
+          curr.timesCorrect += row.original.timesCorrect;
+          curr.timesSeen += row.original.timesSeen;
+
+          return curr;
+        },
+        { timesCorrect: 0, timesSeen: 0 }
+      );
+
+      return (
+        <div className='relative flex justify-center border-b bg-slate-800 py-2'>
+          <StatisticsOverall
+            handsPlayed={timesSeen}
+            handsPlayedCorrect={timesCorrect}
+          />
+          <div className='absolute right-5 top-1/2 -translate-y-1/2'>
+            {timesSeen !== 0 && (
+              <ConfirmationPopover
+                openPopoverElement={
+                  <TrashIcon className='h-8 w-8 stroke-[#878a8c]' />
+                }
+                message='Are you sure you want reset all currently hands displayed?'
+                onConfirm={() => table.options.meta?.deleteCurrentRows()}
+              />
+            )}
+          </div>
+        </div>
+      );
+    },
+    columns: [
+      columnHelper.accessor(
+        (row) => getHandFriendlyName(row.handType, row.playerHandKey),
+        {
+          id: 'playerHand',
+          cell: ({
+            getValue,
+            row: {
+              original: { modifier },
+            },
+          }) => (
+            <div className='relative pr-5 text-left md:pr-10'>
+              {getValue()}
+              {modifier != null && (
+                <Popover className='absolute inset-y-0 right-1 md:right-2'>
+                  <Popover.Button className='underline decoration-dotted'>
+                    <ModifierIcon
+                      Icon={MODIFIER_ICON[modifier.type]}
+                      allowed={modifier.allowed}
+                    />
+                  </Popover.Button>
+                  <Popover.Panel className='absolute z-10 w-40 -translate-x-1/4 rounded-md bg-slate-300 p-2.5 text-sm text-black md:-translate-x-1/2'>
+                    when {MODIFIER_TEXT[modifier.type]} is{' '}
+                    {modifier.allowed ? '' : 'not '}possible
+                  </Popover.Panel>
+                </Popover>
+              )}
+            </div>
+          ),
+          header: 'Player Hand',
+          size: 80,
+        }
+      ),
+      columnHelper.accessor('dealerKey', {
+        cell: ({ getValue }) =>
+          getValue() === '10' ? '10 (J/Q/K)' : getValue(),
+        header: 'Dealer Showing',
+        size: 60,
+      }),
+      columnHelper.accessor('timesCorrect', {
+        header: 'Times Correct',
+        size: 32,
+      }),
+      columnHelper.accessor('timesSeen', {
+        header: 'Times Seen',
+        size: 32,
+      }),
+      columnHelper.accessor((row) => row.timesCorrect / row.timesSeen, {
+        id: 'correctPercent',
+        cell: ({ getValue }) => (getValue() * 100).toFixed(2),
+        header: 'Correct %',
+        size: 60,
+      }),
+      columnHelper.accessor('correctMove', {
+        cell: ({
+          getValue,
+          row: {
+            original: { correctMoveDetailed },
+          },
+        }) => (
+          <Popover className='relative'>
+            <Popover.Button className='underline decoration-dotted'>
+              {getValue()}
+            </Popover.Button>
+            <Popover.Panel className='absolute right-3 z-10 w-40 rounded-md bg-slate-300 p-2.5 text-sm text-black'>
+              {correctMoveDetailed}
+            </Popover.Panel>
+          </Popover>
+        ),
+        header: 'Correct Move',
+        size: 60,
+      }),
+      columnHelper.display({
+        id: 'resetHandStat',
+        cell: ({ row: { original }, table }) => (
+          <ConfirmationPopover
+            openPopoverElement={
+              <TrashIcon className='h-4 w-4 stroke-[#878a8c]' />
+            }
+            message='Are you sure you want reset this hand?'
+            onConfirm={() =>
+              table.options.meta?.deleteRow(
+                original.handType,
+                original.playerHandKey,
+                original.dealerKey,
+                original.modifier
+              )
+            }
+          />
+        ),
+        size: 32,
+      }),
+    ],
+  }),
+];
 
 type StatisticsTableProps = {
   stats: Stats;
@@ -60,275 +205,96 @@ const StatisticsTable = ({
   resetHandStat,
   resetAllHandStatsOfHandType,
 }: StatisticsTableProps) => {
-  const initialState = useMemo(
-    () => ({
-      sortBy: [{ id: 'correctPercent' }, { id: 'timesSeen', desc: true }],
-      globalFilter: handTypeFilter,
-      hiddenColumns: ['modifier', 'handType'],
-    }),
-    [handTypeFilter]
-  );
-
-  const handTypeGlobalFilter = useCallback(
-    (
-      rows: Row<HandStatDisplay<HandKey>>[],
-      columnIds: string[],
-      globalFilterValue?: HandType
-    ) => {
-      if (globalFilterValue == null) {
-        return rows;
-      }
-
-      return rows.filter((row) => row.values['handType'] === globalFilterValue);
-    },
-    []
-  );
-
-  const sortByNumber = useCallback(
-    (
-      rowA: Row<HandStatDisplay<HandKey>>,
-      rowB: Row<HandStatDisplay<HandKey>>,
-      columnId: string
-    ) => {
-      if (rowA.values[columnId] > rowB.values[columnId]) {
-        return 1;
-      }
-
-      if (rowB.values[columnId] > rowA.values[columnId]) {
-        return -1;
-      }
-
-      return 0;
-    },
-    []
-  );
-
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'correctPercent', desc: false },
+    { id: 'timesSeen', desc: true },
+  ]);
   const data = useMemo(() => getHandStatsToDisplay(stats), [stats]);
 
-  const columns = useMemo(
-    () =>
-      [
-        {
-          id: 'headerStat',
-          Header: ({ rows, state }) => {
-            const { timesCorrect, timesSeen } = useMemo(() => {
-              const total = rows.reduce(
-                (curr, row) => {
-                  curr.timesCorrect += row.values.timesCorrect;
-                  curr.timesSeen += row.values.timesSeen;
-
-                  return curr;
-                },
-                { timesCorrect: 0, timesSeen: 0 }
-              );
-
-              return total;
-            }, [rows]);
-
-            return (
-              <div className='relative flex justify-center border-b bg-slate-800 py-2'>
-                <StatisticsOverall
-                  handsPlayed={timesSeen}
-                  handsPlayedCorrect={timesCorrect}
-                />
-                <div className='absolute right-5 top-1/2 -translate-y-1/2'>
-                  {timesSeen !== 0 && (
-                    <ConfirmationPopover
-                      openPopoverElement={
-                        <TrashIcon className='h-8 w-8 stroke-[#878a8c]' />
-                      }
-                      message='Are you sure you want reset all currently hands displayed?'
-                      onConfirm={() =>
-                        resetAllHandStatsOfHandType(state.globalFilter)
-                      }
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          },
-          columns: [
-            {
-              Header: 'Player Hand',
-              id: 'playerHand',
-              accessor: (row) =>
-                getHandFriendlyName(row.handType, row.playerHandKey),
-              Cell: ({
-                row,
-                value,
-              }: {
-                row: Row<HandStatDisplay<HandKey>>;
-                value: string;
-              }) => (
-                <div className='relative pr-5 text-left md:pr-10'>
-                  {value}
-                  {row.original.modifier != null && (
-                    <Popover className='absolute inset-y-0 right-1 md:right-2'>
-                      <Popover.Button className='underline decoration-dotted'>
-                        <ModifierIcon
-                          Icon={MODIFIER_ICON[row.original.modifier.type]}
-                          allowed={row.original.modifier.allowed}
-                        />
-                      </Popover.Button>
-                      <Popover.Panel className='absolute z-10 w-40 -translate-x-1/4 rounded-md bg-slate-300 p-2.5 text-sm text-black md:-translate-x-1/2'>
-                        when {MODIFIER_TEXT[row.original.modifier.type]} is{' '}
-                        {row.original.modifier.allowed ? '' : 'not '}possible
-                      </Popover.Panel>
-                    </Popover>
-                  )}
-                </div>
-              ),
-              width: 80,
-            },
-            {
-              Header: 'Dealer Showing',
-              accessor: 'dealerKey',
-              Cell: ({ value }) => (value === '10' ? '10 (J/Q/K)' : value),
-              width: 60,
-            },
-            {
-              Header: 'Times Correct',
-              accessor: 'timesCorrect',
-              width: 32,
-            },
-            {
-              Header: 'Times Seen',
-              accessor: 'timesSeen',
-              width: 32,
-            },
-            {
-              Header: 'Correct %',
-              accessor: (row) => row.timesCorrect / row.timesSeen,
-              id: 'correctPercent',
-              Cell: ({ value }: { value: number }) => (value * 100).toFixed(2),
-              width: 60,
-              sortType: sortByNumber,
-            },
-            {
-              Header: 'Correct Move',
-              accessor: 'correctMove',
-              Cell: ({ row, value }) => (
-                <Popover className='relative'>
-                  <Popover.Button className='underline decoration-dotted'>
-                    {value}
-                  </Popover.Button>
-                  <Popover.Panel className='absolute right-3 z-10 w-40 rounded-md bg-slate-300 p-2.5 text-sm text-black'>
-                    {row.original.correctMoveDetailed}
-                  </Popover.Panel>
-                </Popover>
-              ),
-              width: 60,
-            },
-            {
-              id: 'resetHandStat',
-              Cell: ({ row }: { row: Row<HandStatDisplay<HandKey>> }) => (
-                <ConfirmationPopover
-                  openPopoverElement={
-                    <TrashIcon className='h-4 w-4 stroke-[#878a8c]' />
-                  }
-                  message='Are you sure you want reset this hand?'
-                  onConfirm={() =>
-                    resetHandStat(
-                      row.original.handType,
-                      row.original.playerHandKey,
-                      row.original.dealerKey,
-                      row.original.modifier
-                    )
-                  }
-                />
-              ),
-              width: 32,
-            },
-          ],
-        },
-        { accessor: 'handType' },
-      ] as Column<HandStatDisplay<HandKey>>[],
-    [resetHandStat, resetAllHandStatsOfHandType, sortByNumber]
-  );
-
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    setGlobalFilter,
-  } = useTable(
-    { columns, data, initialState, globalFilter: handTypeGlobalFilter },
-    useFlexLayout,
-    useGlobalFilter,
-    useSortBy
-  );
-
-  useEffect(() => {
-    setGlobalFilter(handTypeFilter);
-  }, [setGlobalFilter, handTypeFilter]);
+  const table = useReactTable({
+    data,
+    columns,
+    state: { sorting, globalFilter: handTypeFilter },
+    globalFilterFn: (row, columnId, filterValue) =>
+      filterValue === undefined || row.original.handType === filterValue,
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    meta: {
+      deleteRow: (handType, playerHandKey, dealerKey, modifier?) => {
+        resetHandStat(handType, playerHandKey, dealerKey, modifier);
+      },
+      deleteCurrentRows: () => {
+        resetAllHandStatsOfHandType(handTypeFilter);
+      },
+    },
+  });
 
   return (
-    <div className='h-[55vh] w-full space-y-1 overflow-y-auto px-1 md:h-[60vh]'>
-      <table {...getTableProps()} className='w-full'>
+    <div className='h-[55vh] overflow-y-auto px-1 md:h-[60vh]'>
+      <table className='w-full'>
         <thead className='sticky top-0 z-20 bg-slate-500'>
-          {headerGroups.map((headerGroup) => {
-            const { key, ...restHeaderGroupProps } =
-              headerGroup.getHeaderGroupProps();
-            return (
-              <tr key={key} {...restHeaderGroupProps}>
-                {headerGroup.headers.map((column) => {
-                  const { key, ...restColumn } = column.getHeaderProps(
-                    column.getSortByToggleProps()
-                  );
-                  return (
-                    <th
-                      key={key}
-                      {...restColumn}
-                      className={`p-0 ${
-                        column.id !== 'headerStat_0'
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id} className='flex'>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  className='p-0'
+                  style={{
+                    flex: `${header.getSize()} 0 auto`,
+                    width: `${header.getSize()}px`,
+                  }}
+                >
+                  {header.isPlaceholder ? null : (
+                    <div
+                      className={`h-full ${
+                        header.column.id !== 'headerStat'
                           ? 'overflow-hidden text-ellipsis text-xs font-normal md:text-sm md:font-bold'
                           : ''
+                      } ${
+                        header.column.getCanSort()
+                          ? 'cursor-pointer select-none'
+                          : ''
                       }`}
+                      onClick={header.column.getToggleSortingHandler()}
                     >
-                      {column.render('Header')}
-
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                       <span className='text-xs'>
-                        {column.isSorted
-                          ? column.isSortedDesc
-                            ? ' 🔽'
-                            : ' 🔼'
-                          : ''}
+                        {{
+                          asc: ' 🔼',
+                          desc: ' 🔽',
+                        }[header.column.getIsSorted() as string] ?? null}
                       </span>
-                    </th>
-                  );
-                })}
-              </tr>
-            );
-          })}
+                    </div>
+                  )}
+                </th>
+              ))}
+            </tr>
+          ))}
         </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.length > 0 ? (
-            rows.map((row) => {
-              prepareRow(row);
-              const { key, ...restRowProps } = row.getRowProps();
-              return (
-                <tr
-                  key={key}
-                  {...restRowProps}
-                  className='bg-black text-center'
-                >
-                  {row.cells.map((cell) => {
-                    const { key, ...restCellProps } = cell.getCellProps();
-                    return (
-                      <td
-                        key={key}
-                        {...restCellProps}
-                        className='border border-slate-700 text-xs md:text-base'
-                      >
-                        {cell.render('Cell')}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })
+        <tbody>
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className='flex bg-black text-center'>
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className='border border-slate-700 text-xs md:text-base'
+                    style={{
+                      flex: `${cell.column.getSize()} 0 auto`,
+                      width: `${cell.column.getSize()}px`,
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
           ) : (
             <tr className='flex h-24 items-center justify-center italic'>
               No Data

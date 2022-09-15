@@ -10,7 +10,7 @@ const StatisticsOverall = ({
   handsPlayedCorrect,
 }: StatisticsOverallProps) => {
   return (
-    <div className='flex gap-3'>
+    <div className='flex gap-8'>
       <StatisticsOverallItem
         value={handsPlayedCorrect.toString()}
         title='Hands Played Correctly'
