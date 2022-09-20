@@ -29,7 +29,9 @@ const SaveExport = ({ stats }: SaveExportType) => {
         readOnly
       />
       <button
-        className='mt-4 rounded-md bg-sky-900 py-2 text-xl text-white'
+        className={`mt-4 rounded-md py-2 text-xl text-white ${
+          copied ? 'bg-sky-700' : 'bg-sky-900'
+        }`}
         onClick={copyTextToClipboard}
       >
         {copied ? 'Copied!' : 'Copy'}

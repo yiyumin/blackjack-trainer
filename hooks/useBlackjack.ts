@@ -378,21 +378,6 @@ const useBlackjack = () => {
     [setStats]
   );
 
-  const importStats = useCallback(
-    (unvalidatedStats: any) => {
-      const { value, error } = statsSchema.validate(unvalidatedStats);
-
-      if (!error) {
-        setStats(value);
-        return true;
-      }
-
-      alert('Invalid save file.');
-      return false;
-    },
-    [setStats]
-  );
-
   return {
     stats,
     isHandDealt,
@@ -405,7 +390,7 @@ const useBlackjack = () => {
     makeMove,
     resetHandStat,
     resetAllHandStatsOfHandType,
-    importStats,
+    setStats,
   };
 };
 

@@ -29,6 +29,7 @@ import {
   ChartMap,
   dealerKeyIndex,
 } from '../data';
+import { statsSchema } from './validator';
 
 const RANK_VALUE: Record<Rank, number> = {
   '2': 2,
@@ -544,6 +545,11 @@ const getModifier = <KeyType extends string>(
   );
 };
 
+const validateStats = (unvalidatedStats: any) => {
+  const { value, error } = statsSchema.validate(unvalidatedStats);
+  return [!error, value as Stats] as const;
+};
+
 export {
   MOVE_TEXT,
   MODIFIER_TEXT,
@@ -556,4 +562,5 @@ export {
   getHandStatsToDisplay,
   getHandFriendlyName,
   getModifier,
+  validateStats,
 };

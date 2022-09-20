@@ -16,7 +16,7 @@ type SettingProps = {
   selectedPracticeType?: PracticeType;
   setSelectedPracticeType: (practiceType: PracticeType) => void;
   stats: Stats;
-  importStats: (stats: any) => boolean;
+  importStats: (stats: Stats) => void;
 };
 
 const Settings = ({
@@ -103,6 +103,7 @@ const Settings = ({
         colorMode='alternate'
       >
         <SaveImport
+          stats={stats}
           importStats={importStats}
           handleClose={() => setIsImportSaveOpen(false)}
         />
