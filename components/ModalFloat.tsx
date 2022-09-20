@@ -5,10 +5,16 @@ import { Dialog, Transition } from '@headlessui/react';
 type ModalFloatProps = {
   children: React.ReactNode;
   isOpen: boolean;
+  colorMode?: 'default' | 'alternate';
   closeModal: () => void;
 };
 
-const ModalFloat = ({ children, isOpen, closeModal }: ModalFloatProps) => {
+const ModalFloat = ({
+  children,
+  isOpen,
+  closeModal,
+  colorMode = 'default',
+}: ModalFloatProps) => {
   return (
     <Transition
       show={isOpen}
@@ -26,7 +32,13 @@ const ModalFloat = ({ children, isOpen, closeModal }: ModalFloatProps) => {
       >
         <Dialog.Overlay className='fixed inset-0 bg-white opacity-50 dark:bg-black' />
 
-        <div className='relative flex w-11/12 max-w-lg flex-col items-center rounded-xl bg-white p-2 shadow-xl dark:bg-[#121213]'>
+        <div
+          className={`relative flex w-11/12 max-w-lg flex-col items-center rounded-xl p-2 shadow-xl ${
+            colorMode === 'default'
+              ? 'bg-white dark:bg-[#121213]'
+              : ' bg-slate-400 dark:bg-slate-800'
+          }`}
+        >
           <button className='absolute right-5' onClick={closeModal}>
             <XIcon className='h-6 w-6 dark:stroke-white' />
           </button>

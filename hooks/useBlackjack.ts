@@ -25,6 +25,7 @@ import {
 import useLocalStorage from './useLocalStorage';
 import { hardHandChart, pairChart, softHandChart } from '../data';
 import { useSettings } from '../contexts/SettingsProvider';
+import { statsSchema } from '../lib/validator';
 
 const defaultStats: Stats = { pairs: [], softHands: [], hardHands: [] };
 
@@ -377,6 +378,21 @@ const useBlackjack = () => {
     [setStats]
   );
 
+  const importStats = useCallback(
+    (unvalidatedStats: any) => {
+      const { value, error } = statsSchema.validate(unvalidatedStats);
+
+      if (!error) {
+        setStats(value);
+        return true;
+      }
+
+      alert('Invalid save file.');
+      return false;
+    },
+    [setStats]
+  );
+
   return {
     stats,
     isHandDealt,
@@ -389,6 +405,7 @@ const useBlackjack = () => {
     makeMove,
     resetHandStat,
     resetAllHandStatsOfHandType,
+    importStats,
   };
 };
 

@@ -297,7 +297,7 @@ const StatisticsTable = ({
             ))
           ) : (
             <tr className='flex h-24 items-center justify-center italic'>
-              No Data
+              <td>No Data</td>
             </tr>
           )}
         </tbody>

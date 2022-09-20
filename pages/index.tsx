@@ -40,6 +40,7 @@ const Home: NextPage = () => {
     makeMove,
     resetHandStat,
     resetAllHandStatsOfHandType,
+    importStats,
   } = useBlackjack();
 
   useEffect(() => {
@@ -125,6 +126,8 @@ const Home: NextPage = () => {
         <Settings
           selectedPracticeType={selectedPracticeType}
           setSelectedPracticeType={setSelectedPracticeType}
+          stats={stats}
+          importStats={importStats}
         />
       </ModalFullPage>
     </>

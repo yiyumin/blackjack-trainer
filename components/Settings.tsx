@@ -1,19 +1,29 @@
 import { Transition } from '@headlessui/react';
+import { useState } from 'react';
+
 import { useSettings } from '../contexts/SettingsProvider';
-import { PracticeType } from '../types';
-import PracticeTypeListbox from './PracticeTypeListbox';
+import { PracticeType, Stats } from '../types';
 
 import SettingsItem from './SettingsItem';
 import SettingsSwitch from './SettingsSwitch';
+import PracticeTypeListbox from './PracticeTypeListbox';
+import ModalFloat from './ModalFloat';
+import SaveExport from './SaveExport';
+import SaveImport from './SaveImport';
+import SettingsButton from './SettingsButton';
 
 type SettingProps = {
   selectedPracticeType?: PracticeType;
   setSelectedPracticeType: (practiceType: PracticeType) => void;
+  stats: Stats;
+  importStats: (stats: any) => boolean;
 };
 
 const Settings = ({
   selectedPracticeType,
   setSelectedPracticeType,
+  stats,
+  importStats,
 }: SettingProps) => {
   const {
     isDoubleDownAllowed,
@@ -23,6 +33,9 @@ const Settings = ({
     toggleIsDoubleDownAfterSplitAllowed,
     toggleIsSurrenderAllowed,
   } = useSettings();
+
+  const [isExportSaveOpen, setIsExportSaveOpen] = useState(false);
+  const [isImportSaveOpen, setIsImportSaveOpen] = useState(false);
 
   return (
     <div className='mt-2 w-full py-3 px-5'>
@@ -66,6 +79,34 @@ const Settings = ({
           setSelectedPracticeType={setSelectedPracticeType}
         />
       </SettingsItem>
+
+      <div className='space-x-4 py-4'>
+        <SettingsButton onClick={() => setIsExportSaveOpen(true)}>
+          Export Save
+        </SettingsButton>
+        <SettingsButton onClick={() => setIsImportSaveOpen(true)}>
+          Import Save
+        </SettingsButton>
+      </div>
+
+      <ModalFloat
+        isOpen={isExportSaveOpen}
+        closeModal={() => setIsExportSaveOpen(false)}
+        colorMode='alternate'
+      >
+        <SaveExport stats={stats} />
+      </ModalFloat>
+
+      <ModalFloat
+        isOpen={isImportSaveOpen}
+        closeModal={() => setIsImportSaveOpen(false)}
+        colorMode='alternate'
+      >
+        <SaveImport
+          importStats={importStats}
+          handleClose={() => setIsImportSaveOpen(false)}
+        />
+      </ModalFloat>
     </div>
   );
 };
