@@ -73,7 +73,7 @@ const columns = [
       );
 
       return (
-        <div className='relative flex justify-center border-b bg-slate-800 py-2'>
+        <div className='relative flex justify-center border-b bg-slate-800 py-2 text-white'>
           <StatisticsOverall
             handsPlayed={timesSeen}
             handsPlayedCorrect={timesCorrect}
@@ -82,7 +82,7 @@ const columns = [
             {timesSeen !== 0 && (
               <ConfirmationPopover
                 openPopoverElement={
-                  <TrashIcon className='h-8 w-8 stroke-[#878a8c]' />
+                  <TrashIcon className='h-8 w-8 stroke-slate-500' />
                 }
                 message='Are you sure you want reset all currently hands displayed?'
                 onConfirm={() => table.options.meta?.deleteCurrentRows()}
@@ -170,7 +170,7 @@ const columns = [
         cell: ({ row: { original }, table }) => (
           <ConfirmationPopover
             openPopoverElement={
-              <TrashIcon className='h-4 w-4 stroke-[#878a8c]' />
+              <TrashIcon className='h-4 w-4 stroke-slate-500' />
             }
             message='Are you sure you want reset this hand?'
             onConfirm={() =>
@@ -254,7 +254,7 @@ const StatisticsTable = ({
                     <div
                       className={`h-full ${
                         header.column.id !== 'headerStat'
-                          ? 'overflow-hidden text-ellipsis text-xs font-normal md:text-sm md:font-bold'
+                          ? 'overflow-hidden text-ellipsis text-xs font-normal text-white md:text-sm md:font-bold'
                           : ''
                       } ${
                         header.column.getCanSort()
@@ -283,7 +283,10 @@ const StatisticsTable = ({
         <tbody>
           {table.getRowModel().rows.length > 0 ? (
             table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className='flex bg-black text-center'>
+              <tr
+                key={row.id}
+                className='flex bg-white text-center dark:bg-black'
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}

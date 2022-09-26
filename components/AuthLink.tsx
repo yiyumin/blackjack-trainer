@@ -7,7 +7,10 @@ type AuthLinkProps = {
 
 const AuthLink = ({ label, onClick }: AuthLinkProps) => {
   return (
-    <a className='cursor-pointer text-amber-600 underline' onClick={onClick}>
+    <a
+      className='cursor-pointer text-amber-400 underline dark:text-amber-600'
+      onClick={onClick}
+    >
       {label}
     </a>
   );

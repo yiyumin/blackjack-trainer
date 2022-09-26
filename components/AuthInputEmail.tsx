@@ -18,7 +18,7 @@ const AuthInputEmail = ({ label, email, setEmail }: AuthInputEmailProps) => {
       setValue={setEmail}
     >
       <AuthInput.LeftIcon>
-        <MailIcon className='h-6 w-6 stroke-slate-500 stroke-1' />
+        <MailIcon className='h-6 w-6 stroke-slate-400 stroke-1 dark:stroke-slate-500' />
       </AuthInput.LeftIcon>
     </AuthInput>
   );

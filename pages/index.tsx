@@ -99,7 +99,7 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <div className='flex w-full max-w-3xl flex-col justify-between divide-y-2 divide-[#d3d6da] dark:divide-[#3a3a3c]'>
+      <div className='flex w-full max-w-3xl flex-col justify-between divide-y-2 divide-zinc-400 dark:divide-zinc-700'>
         <Head>
           <title>Blackjack Trainer</title>
           <meta name='description' content='Perfect your blackjack strategy.' />

@@ -18,7 +18,7 @@ const Layout = ({ children }: LayoutProps) => {
   }, [isDarkModeEnabled]);
 
   return (
-    <div className='flex h-screen w-screen justify-center dark:bg-[#121213]'>
+    <div className='flex h-screen w-screen justify-center bg-zinc-300 dark:bg-zinc-900'>
       {children}
       <ToastContainer autoClose={2500} transition={Flip} theme='colored' />
     </div>

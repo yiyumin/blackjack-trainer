@@ -35,8 +35,8 @@ const ModalFloat = ({
         <div
           className={`relative flex w-11/12 max-w-lg flex-col items-center rounded-xl p-2 shadow-xl ${
             colorMode === 'default'
-              ? 'bg-white dark:bg-[#121213]'
-              : ' bg-slate-400 dark:bg-slate-800'
+              ? 'bg-zinc-300 dark:bg-zinc-900'
+              : ' bg-slate-600 dark:bg-slate-800'
           }`}
         >
           <button
@@ -44,7 +44,11 @@ const ModalFloat = ({
             onClick={closeModal}
             aria-label='close modal'
           >
-            <XIcon className='h-6 w-6 dark:stroke-white' />
+            <XIcon
+              className={`h-6 w-6 ${
+                colorMode === 'default' ? 'dark:stroke-white' : 'stroke-white'
+              }`}
+            />
           </button>
           {children}
         </div>

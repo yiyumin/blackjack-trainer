@@ -10,12 +10,12 @@ const ModifierIcon = ({ Icon, allowed }: ModifierIconProps) => {
       <Icon
         className={
           allowed
-            ? 'h-5 w-5 text-white md:h-6 md:w-6'
-            : 'h-3 w-3 text-white/70 md:h-5 md:w-5'
+            ? 'h-5 w-5 text-slate-600 dark:text-white md:h-6 md:w-6'
+            : 'h-3 w-3 text-slate-600 dark:text-white/70 md:h-5 md:w-5'
         }
       />
       {!allowed && (
-        <BanIcon className='absolute h-5 w-5 stroke-red-500/50 md:h-6 md:w-6' />
+        <BanIcon className='absolute h-5 w-5 stroke-red-500/75 dark:stroke-red-500/50 md:h-6 md:w-6' />
       )}
     </div>
   );

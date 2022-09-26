@@ -37,11 +37,13 @@ const UserOptions = ({
   );
 
   return (
-    <div className='relative mx-5 text-white'>
-      <div className='text-slate-400'>
+    <div className='relative mx-5 dark:text-white'>
+      <div className='text-slate-500 dark:text-slate-400'>
         Cloud saves{' '}
         {userId ? (
-          <span className='font-bold text-green-600'>enabled</span>
+          <span className='font-bold text-green-500 dark:text-green-600'>
+            enabled
+          </span>
         ) : (
           <span className='font-bold text-red-600'>not enabled</span>
         )}
@@ -51,14 +53,14 @@ const UserOptions = ({
         <>
           <div className='mt-4 flex flex-col gap-x-4 gap-y-2 sm:flex-row'>
             <button
-              className='w-36 rounded-md bg-sky-800 p-2 disabled:cursor-not-allowed disabled:opacity-75'
+              className='w-36 rounded-md bg-sky-600 p-2 text-white disabled:cursor-not-allowed disabled:opacity-75 dark:bg-sky-800'
               onClick={() => forceSave(userId)}
               disabled={saving}
             >
               {saving ? 'Saving...' : 'Force Save'}
             </button>
             <button
-              className='w-36 rounded-md bg-red-900 p-2'
+              className='w-36 rounded-md bg-red-700 p-2 text-white dark:bg-red-900'
               onClick={() => signOut()}
             >
               Sign Out
@@ -82,11 +84,11 @@ const UserOptions = ({
         </>
       ) : (
         <div>
-          <div className='text-sm italic text-slate-400'>
+          <div className='text-sm italic text-slate-500 dark:text-slate-400'>
             Sign in to enable cloud saving.
           </div>
           <button
-            className='mt-4 w-36 rounded-md bg-sky-900 p-2'
+            className='mt-4 w-36 rounded-md bg-sky-700 p-2 text-white dark:bg-sky-900'
             onClick={() => openAuth()}
           >
             Sign In

@@ -71,7 +71,7 @@ const defaultSettings: Settings = {
   isDoubleDownAllowed: true,
   isDoubleDownAfterSplitAllowed: false,
   isSurrenderAllowed: true,
-  isDarkModeEnabled: false,
+  isDarkModeEnabled: true,
 };
 
 // returns a random integer in range [floor, ceiling).

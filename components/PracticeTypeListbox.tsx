@@ -38,7 +38,7 @@ const PracticeTypeListbox = ({
 
         <div className='absolute inset-y-0 right-0 flex items-center pr-2'>
           <SelectorIcon
-            className='h-5 w-5 stroke-[#878a8c]'
+            className='h-5 w-5 stroke-slate-500'
             aria-hidden='true'
           />
         </div>

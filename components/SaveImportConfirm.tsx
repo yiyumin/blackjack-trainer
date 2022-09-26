@@ -72,7 +72,7 @@ const SaveImportConfirm = ({
         </div>
         <button
           onClick={onConfirm}
-          className='rounded-md bg-sky-700 p-2 text-xl'
+          className='rounded-md bg-sky-500 p-2 text-xl dark:bg-sky-700'
         >
           Confirm
         </button>

@@ -25,12 +25,13 @@ const SaveImport = ({ stats, importStats, handleClose }: SaveImportProps) => {
     if (isValid) {
       setImportedStats(validStats);
     } else {
-      toast.error('Invalid save file.');
+      toast.error('Invalid save file');
     }
   };
 
   const onConfirmImport = (statsToImport: Stats) => {
     importStats(statsToImport);
+    toast.success('Save imported!');
     handleClose();
   };
 
@@ -55,7 +56,7 @@ const SaveImport = ({ stats, importStats, handleClose }: SaveImportProps) => {
           />
           <button
             type='submit'
-            className='mt-4 rounded-md bg-sky-900 py-2 text-xl text-white'
+            className='mt-4 rounded-md bg-sky-700 py-2 text-xl text-white dark:bg-sky-900'
             onClick={onNext}
           >
             Next

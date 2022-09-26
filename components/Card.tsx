@@ -14,8 +14,8 @@ type CardProps = {
 const Card = ({ card }: CardProps) => {
   return (
     <div
-      className={`flex h-28 w-20 items-center justify-center rounded-md border-2 ${
-        card ? 'bg-slate-200' : 'bg-blue-600'
+      className={`flex h-28 w-20 items-center justify-center rounded-md border-2 border-black dark:border-white ${
+        card ? 'bg-slate-200' : 'bg-sky-600'
       }`}
     >
       {card && (

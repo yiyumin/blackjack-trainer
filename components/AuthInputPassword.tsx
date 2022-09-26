@@ -25,7 +25,7 @@ const AuthInputPassword = ({
       setValue={setPassword}
     >
       <AuthInput.LeftIcon>
-        <KeyIcon className='h-6 w-6 stroke-slate-500 stroke-1' />
+        <KeyIcon className='h-6 w-6 stroke-slate-400 stroke-1 dark:stroke-slate-500' />
       </AuthInput.LeftIcon>
 
       <AuthInput.RightIcon
@@ -33,9 +33,9 @@ const AuthInputPassword = ({
         onClick={() => setIsPasswordVisible((prev) => !prev)}
       >
         {isPasswordVisible ? (
-          <EyeOffIcon className='h-6 w-6 stroke-slate-500 stroke-1 transition-colors group-hover:stroke-slate-400' />
+          <EyeOffIcon className='h-6 w-6 stroke-slate-400 stroke-1 transition-colors group-hover:stroke-slate-300 dark:stroke-slate-500 dark:group-hover:stroke-slate-400' />
         ) : (
-          <EyeIcon className='h-6 w-6 stroke-slate-500 stroke-1 transition-colors group-hover:stroke-slate-400' />
+          <EyeIcon className='h-6 w-6 stroke-slate-400 stroke-1 transition-colors group-hover:stroke-slate-300 dark:stroke-slate-500 dark:group-hover:stroke-slate-400' />
         )}
       </AuthInput.RightIcon>
     </AuthInput>

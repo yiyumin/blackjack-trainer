@@ -16,7 +16,7 @@ const SettingsSwitch = ({
       checked={isChecked}
       onChange={onChange}
       className={`${
-        isChecked ? 'bg-[#6aaa64]' : 'bg-[#878a8c]'
+        isChecked ? 'bg-green-500' : 'bg-slate-400'
       } relative inline-flex h-5 w-8 items-center rounded-full transition-colors`}
     >
       <span className='sr-only'>{srLabel}</span>

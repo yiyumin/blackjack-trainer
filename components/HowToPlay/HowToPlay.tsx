@@ -16,7 +16,7 @@ const HowToPlay = () => {
   return (
     <div className='w-4/5 py-8'>
       <Tab.Group>
-        <Tab.List className='flex space-x-1 rounded-xl bg-white/20 p-1'>
+        <Tab.List className='flex space-x-1 rounded-xl bg-black/50 p-1 dark:bg-white/20'>
           {tabs.map((tab, idx) => (
             <Tab
               key={idx}
@@ -24,7 +24,7 @@ const HowToPlay = () => {
                 `w-full rounded-lg py-1 text-xs font-medium leading-5 md:py-2.5 md:text-sm ${
                   selected
                     ? 'bg-white shadow'
-                    : 'text-white hover:bg-white/[0.12] hover:text-white'
+                    : 'text-white hover:bg-white/[0.12]'
                 }`
               }
             >

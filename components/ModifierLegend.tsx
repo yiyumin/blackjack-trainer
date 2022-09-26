@@ -24,7 +24,7 @@ const ModifierLegend = () => {
       </ModifierLegendItem>
 
       <ModifierLegendItem description='modifier NOT allowed'>
-        <BanIcon className='h-5 w-5 stroke-red-500/50 md:h-6 md:w-6' />
+        <BanIcon className='h-5 w-5 stroke-red-500/75 dark:stroke-red-500/50 md:h-6 md:w-6' />
       </ModifierLegendItem>
     </div>
   );

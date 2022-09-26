@@ -28,7 +28,7 @@ const AuthInput = ({
         <input
           type={inputType}
           id={id}
-          className='w-full rounded-md border border-slate-500 bg-transparent py-2 px-10 text-sm font-thin outline-none outline-offset-0 focus:outline-amber-600'
+          className='w-full rounded-md border border-slate-400 bg-transparent py-2 px-10 text-sm font-thin outline-none outline-offset-0 focus:outline-amber-600 dark:border-slate-500'
           value={value}
           onChange={(e) => setValue(e.target.value)}
           required
