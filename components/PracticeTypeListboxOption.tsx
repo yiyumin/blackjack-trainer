@@ -4,9 +4,9 @@ import { CheckIcon } from '@heroicons/react/outline';
 import { PracticeType } from '../types';
 
 const OPTION_TYPE_CLASS: Record<'all' | 'hand_type' | 'hand', string> = {
-  all: 'py-2 pl-10 text-lg',
-  hand_type: 'py-1.5 pl-14',
-  hand: 'py-1 pl-20 text-sm',
+  all: 'py-2 pl-4 text-lg',
+  hand_type: 'py-1.5 pl-10',
+  hand: 'py-1 pl-16 text-sm',
 };
 
 type PracticeTypeListboxOptionProps = {
@@ -32,15 +32,15 @@ const PracticeTypeListboxOption = ({
       {({ selected }) => (
         <>
           <span
-            className={`block truncate ${
-              selected ? 'font-medium' : 'font-normal'
+            className={`block truncate pr-8 ${
+              selected ? 'font-bold' : 'font-normal'
             }`}
           >
             {name}
           </span>
 
           {selected ? (
-            <span className='absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600'>
+            <span className='absolute inset-y-0 right-0 flex items-center pr-3 text-amber-600'>
               <CheckIcon className='h-5 w-5' aria-hidden='true' />
             </span>
           ) : null}

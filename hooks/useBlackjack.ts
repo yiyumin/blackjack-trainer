@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
 import {
   DealerKey,
@@ -21,20 +21,15 @@ import {
   getMove,
   getMoveVerbose,
 } from '../lib/blackjack';
-
-import useLocalStorage from './useLocalStorage';
 import { hardHandChart, pairChart, softHandChart } from '../data';
 import { useSettings } from '../contexts/SettingsProvider';
-import { statsSchema } from '../lib/validator';
 
 const defaultStats: Stats = { pairs: [], softHands: [], hardHands: [] };
 
-const useBlackjack = () => {
-  const [stats, setStats] = useLocalStorage(
-    'blackjack-stats',
-    (): Stats => defaultStats
-  );
-
+const useBlackjack = (
+  stats: Stats,
+  setStats: Dispatch<SetStateAction<Stats>>
+) => {
   const {
     isDoubleDownAllowed,
     isDoubleDownAfterSplitAllowed,

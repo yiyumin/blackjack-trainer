@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 type SettingsContextValues = {
   isDoubleDownAllowed: boolean;
@@ -50,7 +56,7 @@ const SettingsProvider = ({ children }: SettingsProviderProps) => {
     localStorage.setItem('blackjack-settings', JSON.stringify(settings));
   }, [settings]);
 
-  const toggleIsDoubleDownAllowed = () => {
+  const toggleIsDoubleDownAllowed = useCallback(() => {
     setSettings((prevSettings) => ({
       ...prevSettings,
       isDoubleDownAllowed: !prevSettings.isDoubleDownAllowed,
@@ -58,22 +64,22 @@ const SettingsProvider = ({ children }: SettingsProviderProps) => {
         prevSettings.isDoubleDownAfterSplitAllowed &&
         !prevSettings.isDoubleDownAllowed,
     }));
-  };
+  }, []);
 
-  const toggleIsDoubleDownAfterSplitAllowed = () => {
+  const toggleIsDoubleDownAfterSplitAllowed = useCallback(() => {
     setSettings((prevSettings) => ({
       ...prevSettings,
       isDoubleDownAfterSplitAllowed:
         !prevSettings.isDoubleDownAfterSplitAllowed,
     }));
-  };
+  }, []);
 
-  const toggleIsSurrenderAllowed = () => {
+  const toggleIsSurrenderAllowed = useCallback(() => {
     setSettings((prevSettings) => ({
       ...prevSettings,
       isSurrenderAllowed: !prevSettings.isSurrenderAllowed,
     }));
-  };
+  }, []);
 
   const value = {
     ...settings,

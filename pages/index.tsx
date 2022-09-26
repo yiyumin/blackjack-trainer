@@ -1,8 +1,11 @@
 import type { NextPage } from 'next';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 
 import { Move } from '../types';
+import { useSupabase } from '../contexts/SupabaseProvider';
+import { useBlackjack } from '../hooks/useBlackjack';
+import { useStats } from '../hooks/useStats';
 
 import Header from '../components/Header';
 import MainBoard from '../components/MainBoard';
@@ -13,7 +16,7 @@ import Result from '../components/Result';
 import ModalFullPage from '../components/ModalFullPage';
 import Statistics from '../components/Statistics';
 import HowToPlay from '../components/HowToPlay';
-import { useBlackjack } from '../hooks/useBlackjack';
+import UpdatePassword from '../components/UpdatePassword';
 
 const KEYBOARD_MOVE_MAP: Record<string, Move> = {
   u: 'hit',
@@ -27,9 +30,25 @@ const Home: NextPage = () => {
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(true);
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isUpdatePasswordOpen, setIsUpdatePasswordOpen] = useState(false);
 
   const {
-    stats,
+    userId,
+    isPasswordRecoveryMode,
+    updatePassword,
+    saveStats,
+    isNewUser,
+    getCompressedStats,
+  } = useSupabase();
+
+  const { stats, setStats, saveFrequency, setSaveFrequency } = useStats(
+    saveStats,
+    isNewUser,
+    getCompressedStats,
+    userId
+  );
+
+  const {
     isHandDealt,
     hand,
     isCorrect,
@@ -40,8 +59,15 @@ const Home: NextPage = () => {
     makeMove,
     resetHandStat,
     resetAllHandStatsOfHandType,
-    setStats,
-  } = useBlackjack();
+  } = useBlackjack(stats, setStats);
+
+  useEffect(() => {
+    setIsUpdatePasswordOpen(isPasswordRecoveryMode);
+
+    if (isPasswordRecoveryMode) {
+      setIsHowToPlayOpen(false);
+    }
+  }, [isPasswordRecoveryMode]);
 
   useEffect(() => {
     if (isHowToPlayOpen || isStatisticsOpen || isSettingsOpen) return;
@@ -79,9 +105,9 @@ const Home: NextPage = () => {
         </Head>
 
         <Header
-          openHowToPlay={() => setIsHowToPlayOpen(true)}
-          openStatistics={() => setIsStatisticsOpen(true)}
-          openSettings={() => setIsSettingsOpen(true)}
+          openHowToPlay={useCallback(() => setIsHowToPlayOpen(true), [])}
+          openStatistics={useCallback(() => setIsStatisticsOpen(true), [])}
+          openSettings={useCallback(() => setIsSettingsOpen(true), [])}
         />
 
         <MainBoard hand={hand} />
@@ -128,8 +154,18 @@ const Home: NextPage = () => {
           setSelectedPracticeType={setSelectedPracticeType}
           stats={stats}
           importStats={setStats}
+          saveFrequency={saveFrequency.current}
+          setSaveFrequency={setSaveFrequency}
         />
       </ModalFullPage>
+
+      <ModalFloat
+        isOpen={isUpdatePasswordOpen}
+        closeModal={() => setIsUpdatePasswordOpen(false)}
+        colorMode='alternate'
+      >
+        <UpdatePassword updatePassword={updatePassword} />
+      </ModalFloat>
     </>
   );
 };

@@ -35,13 +35,14 @@ const StatisticsFilter = ({
             }
           >
             {({ checked }) => (
-              <span
+              <RadioGroup.Label
+                as='span'
                 className={`font-medium  ${
                   checked ? 'text-white' : 'text-gray-900'
                 }`}
               >
                 {label}
-              </span>
+              </RadioGroup.Label>
             )}
           </RadioGroup.Option>
         ))}

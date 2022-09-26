@@ -1,6 +1,7 @@
 import { ArrowRightIcon, ChevronLeftIcon } from '@heroicons/react/outline';
 
 import { HandKey, HandStat, Stats } from '../types';
+
 import StatisticsOverall from './StatisticsOverall';
 
 const getTimesCorrectSeen = (handStats: HandStat<HandKey>[]) =>

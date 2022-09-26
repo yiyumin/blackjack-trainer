@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   ChartBarIcon,
   CogIcon,
@@ -21,7 +22,11 @@ const Header = ({
   return (
     <header className='relative flex items-center justify-center p-2'>
       <div className='absolute left-2'>
-        <HeaderIcon Icon={QuestionMarkCircleIcon} onClick={openHowToPlay} />
+        <HeaderIcon
+          Icon={QuestionMarkCircleIcon}
+          onClick={openHowToPlay}
+          label='open how to play guide'
+        />
       </div>
 
       <HeaderTitle
@@ -30,11 +35,19 @@ const Header = ({
       />
 
       <div className='absolute right-2 flex gap-2'>
-        <HeaderIcon Icon={ChartBarIcon} onClick={openStatistics} />
-        <HeaderIcon Icon={CogIcon} onClick={openSettings} />
+        <HeaderIcon
+          Icon={ChartBarIcon}
+          onClick={openStatistics}
+          label='open hand statistics'
+        />
+        <HeaderIcon
+          Icon={CogIcon}
+          onClick={openSettings}
+          label='open settings'
+        />
       </div>
     </header>
   );
 };
 
-export default Header;
+export default React.memo(Header);

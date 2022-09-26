@@ -1,5 +1,6 @@
 import { useSettings } from '../contexts/SettingsProvider';
 import { Move } from '../types';
+
 import MoveOption from './MoveOption';
 
 type MoveOptionsProps = {

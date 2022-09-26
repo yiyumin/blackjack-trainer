@@ -32,6 +32,7 @@ import {
   getHandStatsToDisplay,
   MODIFIER_TEXT,
 } from '../lib/blackjack';
+
 import ModifierIcon from './ModifierIcon';
 import ConfirmationPopover from './ConfirmationPopover';
 import StatisticsOverall from './StatisticsOverall';
@@ -85,6 +86,7 @@ const columns = [
                 }
                 message='Are you sure you want reset all currently hands displayed?'
                 onConfirm={() => table.options.meta?.deleteCurrentRows()}
+                buttonLabel='open reset all currently displayed hands confirmation popover'
               />
             )}
           </div>
@@ -179,6 +181,7 @@ const columns = [
                 original.modifier
               )
             }
+            buttonLabel='open reset this hand confirmation popover'
           />
         ),
         size: 32,

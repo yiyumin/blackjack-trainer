@@ -11,12 +11,16 @@ import ModalFloat from './ModalFloat';
 import SaveExport from './SaveExport';
 import SaveImport from './SaveImport';
 import SettingsButton from './SettingsButton';
+import Auth from './Auth';
+import UserOptions from './UserOptions';
 
 type SettingProps = {
   selectedPracticeType?: PracticeType;
   setSelectedPracticeType: (practiceType: PracticeType) => void;
   stats: Stats;
   importStats: (stats: Stats) => void;
+  saveFrequency: number;
+  setSaveFrequency: (frequency: number) => void;
 };
 
 const Settings = ({
@@ -24,6 +28,8 @@ const Settings = ({
   setSelectedPracticeType,
   stats,
   importStats,
+  saveFrequency,
+  setSaveFrequency,
 }: SettingProps) => {
   const {
     isDoubleDownAllowed,
@@ -36,9 +42,10 @@ const Settings = ({
 
   const [isExportSaveOpen, setIsExportSaveOpen] = useState(false);
   const [isImportSaveOpen, setIsImportSaveOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   return (
-    <div className='mt-2 w-full py-3 px-5'>
+    <div className='relative mt-2 h-full w-full py-3 px-5'>
       <SettingsItem title='Double down allowed?'>
         <SettingsSwitch
           isChecked={isDoubleDownAllowed}
@@ -89,6 +96,15 @@ const Settings = ({
         </SettingsButton>
       </div>
 
+      <div className='absolute inset-x-0 bottom-6'>
+        <UserOptions
+          openAuth={() => setIsAuthOpen(true)}
+          stats={stats}
+          saveFrequency={saveFrequency}
+          setSaveFrequency={setSaveFrequency}
+        />
+      </div>
+
       <ModalFloat
         isOpen={isExportSaveOpen}
         closeModal={() => setIsExportSaveOpen(false)}
@@ -107,6 +123,14 @@ const Settings = ({
           importStats={importStats}
           handleClose={() => setIsImportSaveOpen(false)}
         />
+      </ModalFloat>
+
+      <ModalFloat
+        isOpen={isAuthOpen}
+        closeModal={() => setIsAuthOpen(false)}
+        colorMode='alternate'
+      >
+        <Auth handleClose={() => setIsAuthOpen(false)} />
       </ModalFloat>
     </div>
   );

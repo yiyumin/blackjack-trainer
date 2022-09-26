@@ -1,5 +1,5 @@
 import React from 'react';
-import { Listbox } from '@headlessui/react';
+import { Listbox, Transition } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
 
 import {
@@ -10,6 +10,7 @@ import {
   handTypes,
 } from '../types';
 import { getHandFriendlyName } from '../lib/blackjack';
+
 import PracticeTypeListboxOption from './PracticeTypeListboxOption';
 
 const handTypeToKeys = {
@@ -28,13 +29,8 @@ const PracticeTypeListbox = ({
   setSelectedPracticeType,
 }: PracticeTypeListboxProps) => {
   return (
-    <Listbox
-      value={selectedPracticeType}
-      onChange={(pt: PracticeType) => {
-        setSelectedPracticeType(pt);
-      }}
-    >
-      <Listbox.Button className='relative w-60 cursor-default rounded-lg bg-white py-2 pl-3 text-left'>
+    <Listbox value={selectedPracticeType} onChange={setSelectedPracticeType}>
+      <Listbox.Button className='relative w-60 cursor-default rounded-lg bg-white py-2 pl-3 pr-7 text-left'>
         {getHandFriendlyName(
           selectedPracticeType?.handType,
           selectedPracticeType?.handKey
@@ -47,38 +43,47 @@ const PracticeTypeListbox = ({
           />
         </div>
       </Listbox.Button>
-      <Listbox.Options className='absolute mt-1 max-h-96 w-60 overflow-auto rounded-lg bg-white py-1'>
-        <PracticeTypeListboxOption
-          name={getHandFriendlyName()}
-          optionType='all'
-        />
-        {handTypes.map((handType) => (
-          <React.Fragment key={handType}>
-            <PracticeTypeListboxOption
-              value={
-                selectedPracticeType?.handType == handType &&
-                selectedPracticeType.handKey == null
-                  ? selectedPracticeType
-                  : { handType }
-              }
-              name={getHandFriendlyName(handType)}
-              optionType='hand_type'
-            />
-            {handTypeToKeys[handType].map((handKey) => (
+      <Transition
+        enter='transition duration-100 ease-out'
+        enterFrom='transform scale-95 opacity-0'
+        enterTo='transform scale-100 opacity-100'
+        leave='transition duration-75 ease-out'
+        leaveFrom='transform scale-100 opacity-100'
+        leaveTo='transform scale-95 opacity-0'
+      >
+        <Listbox.Options className='absolute mt-1 max-h-96 w-full overflow-auto rounded-lg bg-white py-1'>
+          <PracticeTypeListboxOption
+            name={getHandFriendlyName()}
+            optionType='all'
+          />
+          {handTypes.map((handType) => (
+            <React.Fragment key={handType}>
               <PracticeTypeListboxOption
-                key={handKey}
                 value={
                   selectedPracticeType?.handType == handType &&
-                  selectedPracticeType.handKey == handKey
+                  selectedPracticeType.handKey == null
                     ? selectedPracticeType
-                    : { handType, handKey }
+                    : { handType }
                 }
-                name={getHandFriendlyName(handType, handKey)}
+                name={getHandFriendlyName(handType)}
+                optionType='hand_type'
               />
-            ))}
-          </React.Fragment>
-        ))}
-      </Listbox.Options>
+              {handTypeToKeys[handType].map((handKey) => (
+                <PracticeTypeListboxOption
+                  key={handKey}
+                  value={
+                    selectedPracticeType?.handType == handType &&
+                    selectedPracticeType.handKey == handKey
+                      ? selectedPracticeType
+                      : { handType, handKey }
+                  }
+                  name={getHandFriendlyName(handType, handKey)}
+                />
+              ))}
+            </React.Fragment>
+          ))}
+        </Listbox.Options>
+      </Transition>
     </Listbox>
   );
 };

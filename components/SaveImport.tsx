@@ -3,6 +3,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 
 import { Stats } from '../types';
 import { validateStats } from '../lib/blackjack';
+
 import SaveImportConfirm from './SaveImportConfirm';
 
 type SaveImportProps = {

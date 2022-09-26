@@ -34,7 +34,11 @@ const ModalFullPage = ({
           <Dialog.Title className='relative w-full text-center'>
             <span className='font-bold uppercase dark:text-white'>{title}</span>
 
-            <button className='absolute right-5' onClick={closeModal}>
+            <button
+              className='absolute right-5'
+              onClick={closeModal}
+              aria-label='close-modal'
+            >
               <XIcon className='h-6 w-6 dark:stroke-white' />
             </button>
           </Dialog.Title>

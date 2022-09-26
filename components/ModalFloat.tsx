@@ -39,7 +39,11 @@ const ModalFloat = ({
               : ' bg-slate-400 dark:bg-slate-800'
           }`}
         >
-          <button className='absolute right-5' onClick={closeModal}>
+          <button
+            className='absolute right-5'
+            onClick={closeModal}
+            aria-label='close modal'
+          >
             <XIcon className='h-6 w-6 dark:stroke-white' />
           </button>
           {children}

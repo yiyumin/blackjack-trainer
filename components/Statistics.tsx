@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { DealerKey, HandKey, Modifier, HandType, Stats } from '../types';
+
 import StatisticsTable from './StatisticsTable';
 import StatisticsFilter from './StatisticsFilter';
 import ModifierLegend from './ModifierLegend';
