@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 
-import { defaultSettings } from '../lib/blackjack';
+import { defaultSettings, settingsKey } from '../lib/blackjack';
 import { Settings } from '../lib/types';
 import { useSupabase } from './SupabaseProvider';
 
@@ -57,7 +57,7 @@ const SettingsProvider = ({ children }: SettingsProviderProps) => {
       initialSupabaseRender.current = true;
       setSettings(userRecord?.settings ?? getDefaultSettings());
     } else {
-      const blackjackSettings = localStorage.getItem('blackjack-settings');
+      const blackjackSettings = localStorage.getItem(settingsKey);
       if (blackjackSettings !== null) {
         setSettings(JSON.parse(blackjackSettings));
       } else {
@@ -79,7 +79,7 @@ const SettingsProvider = ({ children }: SettingsProviderProps) => {
       }
       saveSettings(userId, settings);
     } else {
-      localStorage.setItem('blackjack-settings', JSON.stringify(settings));
+      localStorage.setItem(settingsKey, JSON.stringify(settings));
     }
   }, [userId, settings, saveSettings]);
 

@@ -62,6 +62,9 @@ const MODIFIER_TEXT: Record<ModifierType, string> = {
   surrender: 'surrendering',
 };
 
+const statsKey = 'blackjack-stats';
+const settingsKey = 'blackjack-settings';
+
 const defaultStats: Stats = { pairs: [], softHands: [], hardHands: [] };
 
 const defaultSettings: Settings = {
@@ -568,6 +571,8 @@ const validateSettings = (unvalidatedSettings: any) => {
 export {
   defaultStats,
   defaultSettings,
+  statsKey,
+  settingsKey,
   MOVE_TEXT,
   MODIFIER_TEXT,
   getCards,

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Stats } from '../lib/types';
-import { defaultStats } from '../lib/blackjack';
+import { defaultStats, statsKey } from '../lib/blackjack';
 import { useSupabase } from '../contexts/SupabaseProvider';
 
 const useStats = () => {
@@ -21,7 +21,7 @@ const useStats = () => {
       setStats(userRecord?.stats ?? defaultStats);
       saveFrequency.current = userRecord?.saveFrequency || 50;
     } else {
-      const blackjackStats = localStorage.getItem('blackjack-stats');
+      const blackjackStats = localStorage.getItem(statsKey);
       if (blackjackStats !== null) {
         setStats(JSON.parse(blackjackStats));
       }
@@ -45,7 +45,7 @@ const useStats = () => {
         saveStats(userId, stats);
       }
     } else {
-      localStorage.setItem('blackjack-stats', JSON.stringify(stats));
+      localStorage.setItem(statsKey, JSON.stringify(stats));
     }
   }, [userId, stats, saveStats]);
 

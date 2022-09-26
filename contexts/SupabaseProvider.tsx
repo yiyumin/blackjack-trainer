@@ -11,6 +11,8 @@ import { supabaseClient } from '../lib/supabaseClient';
 import {
   defaultSettings,
   defaultStats,
+  settingsKey,
+  statsKey,
   validateSettings,
   validateStats,
 } from '../lib/blackjack';
@@ -133,8 +135,8 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
           });
         } else {
           // first time user - upload record from localstorage then reset localstorage
-          const stats = localStorage.getItem('blackjack-stats');
-          const settings = localStorage.getItem('blackjack-settings');
+          const stats = localStorage.getItem(statsKey);
+          const settings = localStorage.getItem(settingsKey);
 
           if (stats && settings) {
             const { error } = await supabaseClient
@@ -149,14 +151,8 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
               ]);
 
             if (error) throw new Error(error.message);
-            localStorage.setItem(
-              'blackjack-stats',
-              JSON.stringify(defaultStats)
-            );
-            localStorage.setItem(
-              'blackjack-settings',
-              JSON.stringify(defaultSettings)
-            );
+            localStorage.setItem(statsKey, JSON.stringify(defaultStats));
+            localStorage.setItem(settingsKey, JSON.stringify(defaultSettings));
 
             setUserRecord({
               stats: JSON.parse(stats),
