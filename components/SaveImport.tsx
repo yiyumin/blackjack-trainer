@@ -56,7 +56,7 @@ const SaveImport = ({ stats, importStats, handleClose }: SaveImportProps) => {
           />
           <button
             type='submit'
-            className='mt-4 rounded-md bg-sky-700 py-2 text-xl text-white dark:bg-sky-900'
+            className='mt-4 rounded-md bg-sky-700 py-2 text-xl text-white transition-colors hover:bg-sky-800 dark:bg-sky-800 dark:hover:bg-sky-900'
             onClick={onNext}
           >
             Next

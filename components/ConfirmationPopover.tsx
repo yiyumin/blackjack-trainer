@@ -24,11 +24,14 @@ const ConfirmationPopover = ({
           <Popover.Button
             as='button'
             onClick={onConfirm}
-            className='rounded-md bg-red-700 p-2.5'
+            className='transtion-colors rounded-md bg-red-700 p-2.5 hover:bg-red-800'
           >
             Confirm
           </Popover.Button>
-          <Popover.Button as='button' className='rounded-md bg-slate-600 p-2.5'>
+          <Popover.Button
+            as='button'
+            className='rounded-md bg-slate-600 p-2.5 transition-colors hover:bg-slate-700'
+          >
             Cancel
           </Popover.Button>
         </div>

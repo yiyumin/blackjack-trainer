@@ -8,7 +8,7 @@ type AuthLinkProps = {
 const AuthLink = ({ label, onClick }: AuthLinkProps) => {
   return (
     <a
-      className='cursor-pointer text-amber-400 underline dark:text-amber-600'
+      className='cursor-pointer text-amber-400 underline transition-colors hover:text-amber-500 dark:text-amber-600 dark:hover:text-amber-700'
       onClick={onClick}
     >
       {label}

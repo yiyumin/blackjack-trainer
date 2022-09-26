@@ -30,7 +30,9 @@ const SaveExport = ({ stats }: SaveExportType) => {
       />
       <button
         className={`mt-4 rounded-md py-2 text-xl text-white ${
-          copied ? 'bg-sky-500 dark:bg-sky-700' : 'bg-sky-700 dark:bg-sky-900'
+          copied
+            ? 'bg-sky-500 dark:bg-sky-700'
+            : 'bg-sky-700 transition-colors hover:bg-sky-800 dark:bg-sky-800 dark:hover:bg-sky-900'
         }`}
         onClick={copyTextToClipboard}
       >

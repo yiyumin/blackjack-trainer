@@ -53,14 +53,14 @@ const UserOptions = ({
         <>
           <div className='mt-4 flex flex-col gap-x-4 gap-y-2 sm:flex-row'>
             <button
-              className='w-36 rounded-md bg-sky-600 p-2 text-white disabled:cursor-not-allowed disabled:opacity-75 dark:bg-sky-800'
+              className='w-36 rounded-md bg-sky-600 p-2 text-white transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-sky-800 hover:dark:bg-sky-900'
               onClick={() => forceSave(userId)}
               disabled={saving}
             >
               {saving ? 'Saving...' : 'Force Save'}
             </button>
             <button
-              className='w-36 rounded-md bg-red-700 p-2 text-white dark:bg-red-900'
+              className='w-36 rounded-md bg-red-700 p-2 text-white transition-colors hover:bg-red-800 dark:bg-red-800 dark:hover:bg-red-900'
               onClick={() => signOut()}
             >
               Sign Out
@@ -88,7 +88,7 @@ const UserOptions = ({
             Sign in to enable cloud saving.
           </div>
           <button
-            className='mt-4 w-36 rounded-md bg-sky-700 p-2 text-white dark:bg-sky-900'
+            className='mt-4 w-36 rounded-md bg-sky-700 p-2 text-white transition-colors hover:bg-sky-800 dark:bg-sky-800 dark:hover:bg-sky-900'
             onClick={() => openAuth()}
           >
             Sign In

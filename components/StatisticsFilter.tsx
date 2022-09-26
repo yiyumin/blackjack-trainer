@@ -24,14 +24,19 @@ const StatisticsFilter = ({
           <RadioGroup.Option
             key={label}
             value={value}
-            className={({ active, checked }) =>
+            disabled={value == handTypeFilter}
+            className={({ active, checked, disabled }) =>
               `${
                 active
                   ? 'ring-2 ring-white ring-opacity-60 ring-offset-2 ring-offset-sky-300'
                   : ''
               } ${
                 checked ? 'bg-sky-900 bg-opacity-75 text-white' : 'bg-white'
-              } cursor-pointer border-2 border-slate-600 py-4 px-2 first:rounded-l-lg last:rounded-r-lg focus:outline-none md:px-5`
+              } ${
+                disabled
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer hover:bg-white/10'
+              } border-2 border-slate-600 py-4 px-2 transition-colors first:rounded-l-lg last:rounded-r-lg focus:outline-none md:px-5`
             }
           >
             {({ checked }) => (

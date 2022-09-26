@@ -82,7 +82,7 @@ const columns = [
             {timesSeen !== 0 && (
               <ConfirmationPopover
                 openPopoverElement={
-                  <TrashIcon className='h-8 w-8 stroke-slate-500' />
+                  <TrashIcon className='h-8 w-8 stroke-slate-500 transition-colors hover:stroke-slate-600' />
                 }
                 message='Are you sure you want reset all currently hands displayed?'
                 onConfirm={() => table.options.meta?.deleteCurrentRows()}
@@ -170,7 +170,7 @@ const columns = [
         cell: ({ row: { original }, table }) => (
           <ConfirmationPopover
             openPopoverElement={
-              <TrashIcon className='h-4 w-4 stroke-slate-500' />
+              <TrashIcon className='h-4 w-4 stroke-slate-500 transition-colors hover:stroke-slate-600' />
             }
             message='Are you sure you want reset this hand?'
             onConfirm={() =>

@@ -39,17 +39,15 @@ const ModalFloat = ({
               : ' bg-slate-600 dark:bg-slate-800'
           }`}
         >
-          <button
-            className='absolute right-5'
-            onClick={closeModal}
-            aria-label='close modal'
-          >
-            <XIcon
-              className={`h-6 w-6 ${
-                colorMode === 'default' ? 'dark:stroke-white' : 'stroke-white'
-              }`}
-            />
-          </button>
+          <div className='group absolute right-5'>
+            <button onClick={closeModal} aria-label='close modal'>
+              <XIcon
+                className={`h-6 w-6 transition-opacity group-hover:opacity-50 ${
+                  colorMode === 'default' ? 'dark:stroke-white' : 'stroke-white'
+                }`}
+              />
+            </button>
+          </div>
           {children}
         </div>
       </Dialog>
