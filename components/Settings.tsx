@@ -35,9 +35,11 @@ const Settings = ({
     isDoubleDownAllowed,
     isDoubleDownAfterSplitAllowed,
     isSurrenderAllowed,
+    isDarkModeEnabled,
     toggleIsDoubleDownAllowed,
     toggleIsDoubleDownAfterSplitAllowed,
     toggleIsSurrenderAllowed,
+    toggleIsDarkModeEnabled,
   } = useSettings();
 
   const [isExportSaveOpen, setIsExportSaveOpen] = useState(false);
@@ -77,6 +79,14 @@ const Settings = ({
           isChecked={isSurrenderAllowed}
           srLabel='Toggle whether surrendering is allowed'
           onChange={toggleIsSurrenderAllowed}
+        />
+      </SettingsItem>
+
+      <SettingsItem title='Dark mode'>
+        <SettingsSwitch
+          isChecked={isDarkModeEnabled}
+          srLabel='Toggle dark mode'
+          onChange={toggleIsDarkModeEnabled}
         />
       </SettingsItem>
 

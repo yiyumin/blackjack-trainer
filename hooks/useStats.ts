@@ -1,131 +1,68 @@
-import {
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { decompressFromEncodedURIComponent } from 'lz-string';
-import { toast } from 'react-toastify';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Stats } from '../lib/types';
-import useLocalStorage from './useLocalStorage';
-import { validateStats } from '../lib/blackjack';
+import { defaultStats } from '../lib/blackjack';
+import { useSupabase } from '../contexts/SupabaseProvider';
 
-const defaultStats: Stats = { pairs: [], softHands: [], hardHands: [] };
-
-const useStats = (
-  saveStats: (userId: string, stats: Stats) => Promise<void>,
-  isNewUser: (userId: string) => Promise<{ error?: string; isNew: boolean }>,
-  getCompressedStats: (
-    userId: string
-  ) => Promise<{ error?: string; compressedStats: any }>,
-  userId: string | null
-) => {
+const useStats = () => {
+  const { userId, userRecord, saveStats, saveSaveFrequency } = useSupabase();
   const [stats, setStats] = useState<Stats>(defaultStats);
-  const [localStats, setLocalStats] = useLocalStorage(
-    'blackjack-stats',
-    (): Stats => defaultStats
-  );
 
-  const renderCount = useRef(0);
+  const initialRender = useRef(true);
+  const initialSupabaseRender = useRef(true);
+
   const saveFrequency = useRef(50);
   const handCount = useRef(0);
 
   useEffect(() => {
-    const fetchData = async (userId: string) => {
-      try {
-        const { error: isNewUserError, isNew } = await isNewUser(userId);
-
-        if (isNewUserError) throw new Error(isNewUserError);
-
-        if (isNew) {
-          await saveStats(userId, localStats);
-          setStats(localStats);
-          setLocalStats(defaultStats);
-        } else {
-          const { error: getStatsError, compressedStats } =
-            await getCompressedStats(userId);
-
-          if (getStatsError) throw new Error(getStatsError);
-          if (typeof compressedStats !== 'string')
-            throw new Error('Returned compressed stats is not of type string');
-
-          const [isValid, validStats] = validateStats(
-            JSON.parse(
-              decompressFromEncodedURIComponent(compressedStats) || '{}'
-            )
-          );
-
-          if (!isValid) throw new Error('Uncompressed stats is not valid');
-
-          setStats(validStats);
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        }
-      } finally {
-        handCount.current = 0;
+    initialRender.current = true;
+    if (userId) {
+      initialSupabaseRender.current = true;
+      setStats(userRecord?.stats ?? defaultStats);
+      saveFrequency.current = userRecord?.saveFrequency || 50;
+    } else {
+      const blackjackStats = localStorage.getItem('blackjack-stats');
+      if (blackjackStats !== null) {
+        setStats(JSON.parse(blackjackStats));
       }
-    };
-
-    if (userId != null) {
-      fetchData(userId);
     }
-  }, [
-    userId,
-    localStats,
-    setLocalStats,
-    isNewUser,
-    saveStats,
-    getCompressedStats,
-  ]);
+  }, [userId, userRecord]);
 
   useEffect(() => {
-    if (!userId) return;
-
-    if (renderCount.current < 2) {
-      // ignoring the first 2 renders. first inital render for when stats is the default value. second for when stats is populated with data from the cloud.
-      renderCount.current += 1;
+    if (initialRender.current) {
+      initialRender.current = false;
       return;
     }
 
-    handCount.current += 1;
-    if (handCount.current === saveFrequency.current) {
-      handCount.current = 0;
-      saveStats(userId, stats);
-    }
-  }, [userId, saveStats, stats]);
-
-  const setSaveFrequency = useCallback((frequency: number) => {
-    saveFrequency.current = frequency;
-    handCount.current = 0;
-  }, []);
-
-  const customSetStats = useCallback(
-    (value: SetStateAction<Stats>) => {
-      if (userId != null) {
-        return setStats(value);
+    if (userId) {
+      if (initialSupabaseRender.current) {
+        initialSupabaseRender.current = false;
+        return;
       }
+      handCount.current += 1;
+      if (handCount.current === saveFrequency.current) {
+        handCount.current = 0;
+        saveStats(userId, stats);
+      }
+    } else {
+      localStorage.setItem('blackjack-stats', JSON.stringify(stats));
+    }
+  }, [userId, stats, saveStats]);
 
-      return setLocalStats(value);
+  const setSaveFrequency = useCallback(
+    (frequency: number) => {
+      if (!userId) return;
+
+      saveFrequency.current = frequency;
+      handCount.current = 0;
+      saveSaveFrequency(userId, frequency);
     },
-    [userId, setLocalStats]
+    [userId, saveSaveFrequency]
   );
 
-  const customStats = useMemo(() => {
-    if (userId != null) {
-      return stats;
-    }
-
-    return localStats;
-  }, [userId, stats, localStats]);
-
   return {
-    stats: customStats,
-    setStats: customSetStats,
+    stats,
+    setStats,
     saveFrequency,
     setSaveFrequency,
   };

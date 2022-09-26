@@ -124,6 +124,13 @@ type PracticeType = {
 
 type HeroIcon = (props: React.ComponentProps<'svg'>) => JSX.Element;
 
+type Settings = {
+  isDoubleDownAllowed: boolean;
+  isDoubleDownAfterSplitAllowed: boolean;
+  isSurrenderAllowed: boolean;
+  isDarkModeEnabled: boolean;
+};
+
 export {
   suits,
   ranks,
@@ -155,4 +162,5 @@ export type {
   ModifierType,
   Modifier,
   HeroIcon,
+  Settings,
 };

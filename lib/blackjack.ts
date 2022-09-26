@@ -21,6 +21,7 @@ import {
   ModifierType,
   ChartMove,
   Modifier,
+  Settings,
 } from './types';
 import {
   pairChart,
@@ -29,7 +30,7 @@ import {
   ChartMap,
   dealerKeyIndex,
 } from './charts';
-import { statsSchema } from './validator';
+import { settingsSchema, statsSchema } from './validator';
 
 const RANK_VALUE: Record<Rank, number> = {
   '2': 2,
@@ -59,6 +60,15 @@ const MODIFIER_TEXT: Record<ModifierType, string> = {
   double_down: 'doubling down',
   double_down_after_split: 'doubling down after splits',
   surrender: 'surrendering',
+};
+
+const defaultStats: Stats = { pairs: [], softHands: [], hardHands: [] };
+
+const defaultSettings: Settings = {
+  isDoubleDownAllowed: true,
+  isDoubleDownAfterSplitAllowed: false,
+  isSurrenderAllowed: true,
+  isDarkModeEnabled: false,
 };
 
 // returns a random integer in range [floor, ceiling).
@@ -550,7 +560,14 @@ const validateStats = (unvalidatedStats: any) => {
   return [!error, value as Stats] as const;
 };
 
+const validateSettings = (unvalidatedSettings: any) => {
+  const { value, error } = settingsSchema.validate(unvalidatedSettings);
+  return [!error, value as Settings] as const;
+};
+
 export {
+  defaultStats,
+  defaultSettings,
   MOVE_TEXT,
   MODIFIER_TEXT,
   getCards,
@@ -563,4 +580,5 @@ export {
   getHandFriendlyName,
   getModifier,
   validateStats,
+  validateSettings,
 };

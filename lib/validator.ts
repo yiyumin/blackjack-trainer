@@ -58,4 +58,11 @@ const statsSchema = Joi.object({
     .required(),
 });
 
-export { statsSchema };
+const settingsSchema = Joi.object({
+  isDoubleDownAllowed: Joi.boolean().required(),
+  isDoubleDownAfterSplitAllowed: Joi.boolean().required(),
+  isSurrenderAllowed: Joi.boolean().required(),
+  isDarkModeEnabled: Joi.boolean().required(),
+});
+
+export { statsSchema, settingsSchema };

@@ -1,13 +1,27 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthChangeEvent, Provider, Session } from '@supabase/supabase-js';
-import { compressToEncodedURIComponent } from 'lz-string';
+import {
+  compressToEncodedURIComponent,
+  decompressFromEncodedURIComponent,
+} from 'lz-string';
 import { toast } from 'react-toastify';
 
-import { Stats } from '../lib/types';
+import { Settings, Stats } from '../lib/types';
 import { supabaseClient } from '../lib/supabaseClient';
+import {
+  defaultSettings,
+  defaultStats,
+  validateSettings,
+  validateStats,
+} from '../lib/blackjack';
 
 type SupabaseContextValues = {
   userId: string | null;
+  userRecord: {
+    stats: Stats;
+    settings: Settings;
+    saveFrequency: number;
+  } | null;
   isPasswordRecoveryMode: boolean;
   signUp: (email: string, password: string) => Promise<void>;
   signInWithPassword: (
@@ -21,12 +35,8 @@ type SupabaseContextValues = {
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
   saveStats: (userId: string, stats: Stats) => Promise<void>;
-  getCompressedStats: (
-    userId: string
-  ) => Promise<{ error: string | undefined; compressedStats: any }>;
-  isNewUser: (
-    userId: string
-  ) => Promise<{ error: string | undefined; isNew: boolean }>;
+  saveSettings: (userId: string, settings: Settings) => Promise<void>;
+  saveSaveFrequency: (userId: string, saveFrequency: number) => Promise<void>;
 };
 
 const SupabaseContext = React.createContext<SupabaseContextValues | undefined>(
@@ -47,6 +57,11 @@ type SupabaseProviderProps = {
 };
 const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
   const [userId, setUserId] = useState<string | null>(null);
+  const [userRecord, setUserRecord] = useState<{
+    stats: Stats;
+    settings: Settings;
+    saveFrequency: number;
+  } | null>(null);
   const [isPasswordRecoveryMode, setIsPasswordRecoveryMode] = useState(false);
 
   useEffect(() => {
@@ -72,6 +87,93 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
         toast.error(error);
       });
   }, []);
+
+  useEffect(() => {
+    if (!userId) {
+      setUserRecord(null);
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const { data } = await supabaseClient
+          .from('blackjack_trainer')
+          .select('stats,settings,save_freq')
+          .eq('id', userId)
+          .single();
+
+        // returning user - pull record from db
+        if (data) {
+          if (typeof data.stats !== 'string')
+            throw new Error('Returned compressed stats is not of type string');
+          if (typeof data.settings !== 'string')
+            throw new Error(
+              'Returned compressed settings is not of type string'
+            );
+          if (typeof data.save_freq !== 'number')
+            throw new Error('Returned save frequency is not of type number');
+
+          const [statsIsValid, validStats] = validateStats(
+            JSON.parse(decompressFromEncodedURIComponent(data.stats) || '{}')
+          );
+          if (!statsIsValid) throw new Error('Uncompressed stats is not valid');
+
+          const [settingsIsValid, validSettings] = validateSettings(
+            JSON.parse(decompressFromEncodedURIComponent(data.settings) || '{}')
+          );
+          if (!settingsIsValid)
+            throw new Error('Uncompressed settings is not valid');
+
+          console.log(validStats, validSettings, data.save_freq);
+
+          setUserRecord({
+            stats: validStats,
+            settings: validSettings,
+            saveFrequency: data.save_freq,
+          });
+        } else {
+          // first time user - upload record from localstorage then reset localstorage
+          const stats = localStorage.getItem('blackjack-stats');
+          const settings = localStorage.getItem('blackjack-settings');
+
+          if (stats && settings) {
+            const { error } = await supabaseClient
+              .from('blackjack_trainer')
+              .insert([
+                {
+                  id: userId,
+                  stats: compressToEncodedURIComponent(stats),
+                  settings: compressToEncodedURIComponent(settings),
+                  save_freq: 50,
+                },
+              ]);
+
+            if (error) throw new Error(error.message);
+            localStorage.setItem(
+              'blackjack-stats',
+              JSON.stringify(defaultStats)
+            );
+            localStorage.setItem(
+              'blackjack-settings',
+              JSON.stringify(defaultSettings)
+            );
+
+            setUserRecord({
+              stats: JSON.parse(stats),
+              settings: JSON.parse(settings),
+              saveFrequency: 50,
+            });
+          }
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        }
+      }
+    };
+
+    fetchData();
+  }, [userId]);
 
   const signUp = useCallback(async (email: string, password: string) => {
     try {
@@ -163,26 +265,26 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 
   const saveStats = useCallback(async (userId: string, stats: Stats) => {
     const updates = {
-      id: userId,
       stats: compressToEncodedURIComponent(JSON.stringify(stats)),
       updated_at: new Date(),
     };
 
-    const toastId = toast.loading('Saving...');
+    const toastId = toast.loading('Saving stats...');
     const { error } = await supabaseClient
-      .from('blackjack_stats')
-      .upsert(updates);
+      .from('blackjack_trainer')
+      .update(updates)
+      .eq('id', userId);
 
     if (error) {
       toast.update(toastId, {
-        render: error.message,
+        render: `Error saving stats: ${error.message}`,
         type: 'error',
         isLoading: false,
         autoClose: 2500,
       });
     } else {
       toast.update(toastId, {
-        render: 'Saved!',
+        render: 'Stats saved!',
         type: 'success',
         isLoading: false,
         autoClose: 2500,
@@ -190,33 +292,73 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     }
   }, []);
 
-  const getCompressedStats = useCallback(async (userId: string) => {
-    const { data, error } = await supabaseClient
-      .from('blackjack_stats')
-      .select('stats')
-      .eq('id', userId)
-      .single();
+  const saveSettings = useCallback(
+    async (userId: string, settings: Settings) => {
+      const updates = {
+        settings: compressToEncodedURIComponent(JSON.stringify(settings)),
+        updated_at: new Date(),
+      };
 
-    return {
-      error: error?.message,
-      compressedStats: data?.stats,
-    };
-  }, []);
+      const toastId = toast.loading('Saving settings...');
+      const { error } = await supabaseClient
+        .from('blackjack_trainer')
+        .update(updates)
+        .eq('id', userId);
 
-  const isNewUser = useCallback(async (userId: string) => {
-    const { error, count } = await supabaseClient
-      .from('blackjack_stats')
-      .select('id', { count: 'estimated', head: true })
-      .eq('id', userId);
+      if (error) {
+        toast.update(toastId, {
+          render: `Error saving settings: ${error.message}`,
+          type: 'error',
+          isLoading: false,
+          autoClose: 2500,
+        });
+      } else {
+        toast.update(toastId, {
+          render: 'Settings saved!',
+          type: 'success',
+          isLoading: false,
+          autoClose: 2500,
+        });
+      }
+    },
+    []
+  );
 
-    return {
-      error: error && error.message,
-      isNew: count == 0,
-    };
-  }, []);
+  const saveSaveFrequency = useCallback(
+    async (userId: string, saveFrequency: number) => {
+      const updates = {
+        save_freq: saveFrequency,
+        updated_at: new Date(),
+      };
+
+      const toastId = toast.loading('Saving save frequency...');
+      const { error } = await supabaseClient
+        .from('blackjack_trainer')
+        .update(updates)
+        .eq('id', userId);
+
+      if (error) {
+        toast.update(toastId, {
+          render: `Error saving save frequency: ${error.message}`,
+          type: 'error',
+          isLoading: false,
+          autoClose: 2500,
+        });
+      } else {
+        toast.update(toastId, {
+          render: 'Save frequency saved!',
+          type: 'success',
+          isLoading: false,
+          autoClose: 2500,
+        });
+      }
+    },
+    []
+  );
 
   const value = {
     userId,
+    userRecord,
     isPasswordRecoveryMode,
     signUp,
     signInWithPassword,
@@ -226,8 +368,8 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     resetPassword,
     updatePassword,
     saveStats,
-    getCompressedStats,
-    isNewUser,
+    saveSettings,
+    saveSaveFrequency,
   };
 
   return (

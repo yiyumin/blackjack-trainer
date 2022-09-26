@@ -32,21 +32,9 @@ const Home: NextPage = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isUpdatePasswordOpen, setIsUpdatePasswordOpen] = useState(false);
 
-  const {
-    userId,
-    isPasswordRecoveryMode,
-    updatePassword,
-    saveStats,
-    isNewUser,
-    getCompressedStats,
-  } = useSupabase();
+  const { isPasswordRecoveryMode, updatePassword } = useSupabase();
 
-  const { stats, setStats, saveFrequency, setSaveFrequency } = useStats(
-    saveStats,
-    isNewUser,
-    getCompressedStats,
-    userId
-  );
+  const { stats, setStats, saveFrequency, setSaveFrequency } = useStats();
 
   const {
     isHandDealt,

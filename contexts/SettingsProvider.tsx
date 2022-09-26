@@ -6,13 +6,19 @@ import React, {
   useState,
 } from 'react';
 
+import { defaultSettings } from '../lib/blackjack';
+import { Settings } from '../lib/types';
+import { useSupabase } from './SupabaseProvider';
+
 type SettingsContextValues = {
   isDoubleDownAllowed: boolean;
   isDoubleDownAfterSplitAllowed: boolean;
   isSurrenderAllowed: boolean;
+  isDarkModeEnabled: boolean;
   toggleIsDoubleDownAllowed: () => void;
   toggleIsDoubleDownAfterSplitAllowed: () => void;
   toggleIsSurrenderAllowed: () => void;
+  toggleIsDarkModeEnabled: () => void;
 };
 
 const SettingsContext = React.createContext<SettingsContextValues | undefined>(
@@ -33,19 +39,32 @@ type SettingsProviderProps = {
 };
 
 const SettingsProvider = ({ children }: SettingsProviderProps) => {
-  const [settings, setSettings] = useState({
-    isDoubleDownAllowed: true,
-    isDoubleDownAfterSplitAllowed: false,
-    isSurrenderAllowed: true,
-  });
+  const { userId, userRecord, saveSettings } = useSupabase();
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
   const initialRender = useRef(true);
+  const initialSupabaseRender = useRef(true);
 
   useEffect(() => {
-    const blackjackSettings = localStorage.getItem('blackjack-settings');
-    if (blackjackSettings !== null) {
-      setSettings(JSON.parse(blackjackSettings));
+    const getDefaultSettings = () => ({
+      ...defaultSettings,
+      isDarkModeEnabled:
+        window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches,
+    });
+    initialRender.current = true;
+
+    if (userId) {
+      initialSupabaseRender.current = true;
+      setSettings(userRecord?.settings ?? getDefaultSettings());
+    } else {
+      const blackjackSettings = localStorage.getItem('blackjack-settings');
+      if (blackjackSettings !== null) {
+        setSettings(JSON.parse(blackjackSettings));
+      } else {
+        setSettings(getDefaultSettings());
+      }
     }
-  }, []);
+  }, [userId, userRecord]);
 
   useEffect(() => {
     if (initialRender.current) {
@@ -53,8 +72,16 @@ const SettingsProvider = ({ children }: SettingsProviderProps) => {
       return;
     }
 
-    localStorage.setItem('blackjack-settings', JSON.stringify(settings));
-  }, [settings]);
+    if (userId) {
+      if (initialSupabaseRender.current) {
+        initialSupabaseRender.current = false;
+        return;
+      }
+      saveSettings(userId, settings);
+    } else {
+      localStorage.setItem('blackjack-settings', JSON.stringify(settings));
+    }
+  }, [userId, settings, saveSettings]);
 
   const toggleIsDoubleDownAllowed = useCallback(() => {
     setSettings((prevSettings) => ({
@@ -81,11 +108,19 @@ const SettingsProvider = ({ children }: SettingsProviderProps) => {
     }));
   }, []);
 
+  const toggleIsDarkModeEnabled = useCallback(() => {
+    setSettings((prevSettings) => ({
+      ...prevSettings,
+      isDarkModeEnabled: !prevSettings.isDarkModeEnabled,
+    }));
+  }, []);
+
   const value = {
     ...settings,
     toggleIsDoubleDownAllowed,
     toggleIsDoubleDownAfterSplitAllowed,
     toggleIsSurrenderAllowed,
+    toggleIsDarkModeEnabled,
   };
 
   return (
