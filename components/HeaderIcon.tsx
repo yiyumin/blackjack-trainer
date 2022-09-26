@@ -1,4 +1,4 @@
-import { HeroIcon } from '../types';
+import { HeroIcon } from '../lib/types';
 
 type HeaderIconProps = {
   Icon: HeroIcon;

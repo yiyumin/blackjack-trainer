@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import { Stats } from '../types';
+import { Stats } from '../lib/types';
 import useLocalStorage from './useLocalStorage';
 import { validateStats } from '../lib/blackjack';
 

@@ -26,7 +26,7 @@ import {
   Modifier,
   ModifierType,
   Stats,
-} from '../types';
+} from '../lib/types';
 import {
   getHandFriendlyName,
   getHandStatsToDisplay,

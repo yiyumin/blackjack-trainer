@@ -8,7 +8,7 @@ import {
   softHandKeys,
   hardHandKeys,
   handTypes,
-} from '../types';
+} from '../lib/types';
 import { getHandFriendlyName } from '../lib/blackjack';
 
 import PracticeTypeListboxOption from './PracticeTypeListboxOption';

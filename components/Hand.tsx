@@ -1,4 +1,4 @@
-import { Card as CardType } from '../types';
+import { Card as CardType } from '../lib/types';
 
 import Card from './Card';
 

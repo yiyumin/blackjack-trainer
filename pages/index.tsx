@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import { useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 
-import { Move } from '../types';
+import { Move } from '../lib/types';
 import { useSupabase } from '../contexts/SupabaseProvider';
 import { useBlackjack } from '../hooks/useBlackjack';
 import { useStats } from '../hooks/useStats';

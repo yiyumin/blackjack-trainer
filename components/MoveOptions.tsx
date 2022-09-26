@@ -1,5 +1,5 @@
 import { useSettings } from '../contexts/SettingsProvider';
-import { Move } from '../types';
+import { Move } from '../lib/types';
 
 import MoveOption from './MoveOption';
 

@@ -1,7 +1,7 @@
 import { Listbox } from '@headlessui/react';
 import { CheckIcon } from '@heroicons/react/outline';
 
-import { PracticeType } from '../types';
+import { PracticeType } from '../lib/types';
 
 const OPTION_TYPE_CLASS: Record<'all' | 'hand_type' | 'hand', string> = {
   all: 'py-2 pl-4 text-lg',

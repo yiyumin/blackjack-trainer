@@ -21,14 +21,14 @@ import {
   ModifierType,
   ChartMove,
   Modifier,
-} from '../types';
+} from './types';
 import {
   pairChart,
   softHandChart,
   hardHandChart,
   ChartMap,
   dealerKeyIndex,
-} from '../data';
+} from './charts';
 import { statsSchema } from './validator';
 
 const RANK_VALUE: Record<Rank, number> = {

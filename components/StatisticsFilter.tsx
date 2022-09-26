@@ -1,6 +1,6 @@
 import { RadioGroup } from '@headlessui/react';
 
-import { HandType } from '../types';
+import { HandType } from '../lib/types';
 
 type StatisticsFilterProps = {
   handTypeFilter?: HandType;

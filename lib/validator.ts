@@ -6,7 +6,7 @@ import {
   pairKeys,
   softHandKeys,
   hardHandKeys,
-} from '../types';
+} from './types';
 
 const modifierSchema = Joi.object({
   type: Joi.string()

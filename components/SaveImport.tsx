@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import { Stats } from '../types';
+import { Stats } from '../lib/types';
 import { validateStats } from '../lib/blackjack';
 
 import SaveImportConfirm from './SaveImportConfirm';

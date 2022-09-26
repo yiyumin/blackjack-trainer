@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { Stats } from '../types';
+import { Stats } from '../lib/types';
 import { useSupabase } from '../contexts/SupabaseProvider';
 
 import SaveFrequencyListbox from './SaveFrequencyListbox';

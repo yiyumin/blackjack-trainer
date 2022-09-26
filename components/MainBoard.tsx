@@ -1,4 +1,4 @@
-import { Hand as HandType } from '../types';
+import { Hand as HandType } from '../lib/types';
 import Hand from './Hand';
 
 type MainBoardProps = {

@@ -1,6 +1,6 @@
 import { ArrowRightIcon, ChevronLeftIcon } from '@heroicons/react/outline';
 
-import { HandKey, HandStat, Stats } from '../types';
+import { HandKey, HandStat, Stats } from '../lib/types';
 
 import StatisticsOverall from './StatisticsOverall';
 

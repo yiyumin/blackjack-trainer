@@ -11,7 +11,7 @@ import {
   Rank,
   SoftHandKey,
   Stats,
-} from '../types';
+} from '../lib/types';
 import {
   convertHardHandTotalValueToKey,
   convertToSimpleRank,
@@ -21,7 +21,7 @@ import {
   getMove,
   getMoveVerbose,
 } from '../lib/blackjack';
-import { hardHandChart, pairChart, softHandChart } from '../data';
+import { hardHandChart, pairChart, softHandChart } from '../lib/charts';
 import { useSettings } from '../contexts/SettingsProvider';
 
 const defaultStats: Stats = { pairs: [], softHands: [], hardHands: [] };

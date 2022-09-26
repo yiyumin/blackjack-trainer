@@ -1,6 +1,6 @@
 import { BanIcon } from '@heroicons/react/outline';
 
-import { HeroIcon } from '../types';
+import { HeroIcon } from '../lib/types';
 
 type ModifierIconProps = { Icon: HeroIcon; allowed: boolean };
 

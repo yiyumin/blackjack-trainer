@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthChangeEvent, Provider, Session } from '@supabase/supabase-js';
 import { compressToEncodedURIComponent } from 'lz-string';
 
-import { Stats } from '../types';
+import { Stats } from '../lib/types';
 import { supabaseClient } from '../lib/supabaseClient';
 
 type SupabaseContextValues = {

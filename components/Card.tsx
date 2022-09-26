@@ -1,4 +1,4 @@
-import { Card as CardType, Suit } from '../types';
+import { Card as CardType, Suit } from '../lib/types';
 
 const SUIT_COLOR_MAP: Record<Suit, string> = {
   '♠': 'text-black',

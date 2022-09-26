@@ -2,7 +2,7 @@ import { Transition } from '@headlessui/react';
 import { useState } from 'react';
 
 import { useSettings } from '../contexts/SettingsProvider';
-import { PracticeType, Stats } from '../types';
+import { PracticeType, Stats } from '../lib/types';
 
 import SettingsItem from './SettingsItem';
 import SettingsSwitch from './SettingsSwitch';

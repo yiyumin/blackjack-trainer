@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { compressToEncodedURIComponent } from 'lz-string';
 
-import { Stats } from '../types';
+import { Stats } from '../lib/types';
 
 type SaveExportType = {
   stats: Stats;
