@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { decompressFromEncodedURIComponent } from 'lz-string';
+import { toast } from 'react-toastify';
 
 import { Stats } from '../lib/types';
 import useLocalStorage from './useLocalStorage';
@@ -63,8 +64,7 @@ const useStats = (
         }
       } catch (error) {
         if (error instanceof Error) {
-          console.log('Error thrown:', error.message);
-          alert(error.message);
+          toast.error(error.message);
         }
       } finally {
         handCount.current = 0;
@@ -93,9 +93,7 @@ const useStats = (
     }
 
     handCount.current += 1;
-    console.log(handCount.current);
     if (handCount.current === saveFrequency.current) {
-      console.log('saving');
       handCount.current = 0;
       saveStats(userId, stats);
     }

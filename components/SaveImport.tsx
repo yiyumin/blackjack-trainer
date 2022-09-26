@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { decompressFromEncodedURIComponent } from 'lz-string';
+import { toast } from 'react-toastify';
 
 import { Stats } from '../lib/types';
 import { validateStats } from '../lib/blackjack';
@@ -24,7 +25,7 @@ const SaveImport = ({ stats, importStats, handleClose }: SaveImportProps) => {
     if (isValid) {
       setImportedStats(validStats);
     } else {
-      alert('Invalid save file.');
+      toast.error('Invalid save file.');
     }
   };
 

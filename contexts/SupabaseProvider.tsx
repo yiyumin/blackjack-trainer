@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthChangeEvent, Provider, Session } from '@supabase/supabase-js';
 import { compressToEncodedURIComponent } from 'lz-string';
+import { toast } from 'react-toastify';
 
 import { Stats } from '../lib/types';
 import { supabaseClient } from '../lib/supabaseClient';
@@ -68,7 +69,7 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
         setUserId(session?.user.id ?? null);
       })
       .catch((error) => {
-        console.log(error);
+        toast.error(error);
       });
   }, []);
 
@@ -77,11 +78,10 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       const { error } = await supabaseClient.auth.signUp({ email, password });
 
       if (error) throw error;
-      alert('Email sent! Check your inbox to verify your email.');
+      toast.success('Email sent! Check your inbox to verify your email.');
     } catch (error) {
       if (error instanceof Error) {
-        console.log('Error thrown:', error.message);
-        alert(error.message);
+        toast.error(`Error logging up: ${error.message}`);
       }
     }
   }, []);
@@ -95,11 +95,10 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
         });
         if (error) throw error;
         onSuccessCallback();
-        alert('Logged in!');
+        toast.success('Logged in!');
       } catch (error) {
         if (error instanceof Error) {
-          console.log('Error thrown:', error.message);
-          alert(error.message);
+          toast.error(`Error logging in: ${error.message}`);
         }
       }
     },
@@ -112,11 +111,10 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
         email,
       });
       if (error) throw error;
-      alert('Check your email for the login link!');
+      toast.success('Check your email for the login link!');
     } catch (error) {
       if (error instanceof Error) {
-        console.log('Error thrown:', error.message);
-        alert(error.message);
+        toast.error(`Error generating login link: ${error.message}`);
       }
     }
   }, []);
@@ -129,26 +127,25 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       if (error) throw error;
     } catch (error) {
       if (error instanceof Error) {
-        console.log('Error thrown:', error.message);
-        alert(error.message);
+        toast.error(`Error logging in with provider: ${error.message}`);
       }
     }
   }, []);
 
   const signOut = useCallback(async () => {
     const { error } = await supabaseClient.auth.signOut();
-    if (error) console.log('Error logging out:', error.message);
+    if (error) toast.error(`Error logging out: ${error.message}`);
+    else toast.success('Logged out!');
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
     try {
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
       if (error) throw error;
-      alert('Check your email for the password recovery link!');
+      toast.success('Check your email for the password recovery link!');
     } catch (error) {
       if (error instanceof Error) {
-        console.log('Error thrown:', error.message);
-        alert(error.message);
+        toast.error(`Error resetting password: ${error.message}`);
       }
     }
   }, []);
@@ -157,8 +154,10 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     const { data, error } = await supabaseClient.auth.updateUser({
       password,
     });
-    if (data) alert('Password updated successfully!');
-    if (error) alert('There was an error updating your password.');
+
+    if (data) toast.success('Password updated successfully!');
+    if (error) toast.error('There was an error updating your password');
+
     setIsPasswordRecoveryMode(false);
   }, []);
 
@@ -169,12 +168,25 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       updated_at: new Date(),
     };
 
+    const toastId = toast.loading('Saving...');
     const { error } = await supabaseClient
       .from('blackjack_stats')
       .upsert(updates);
 
     if (error) {
-      alert(error.message);
+      toast.update(toastId, {
+        render: error.message,
+        type: 'error',
+        isLoading: false,
+        autoClose: 2500,
+      });
+    } else {
+      toast.update(toastId, {
+        render: 'Saved!',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2500,
+      });
     }
   }, []);
 
