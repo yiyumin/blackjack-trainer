@@ -30,16 +30,16 @@ const ModalFullPage = ({
         onClose={closeModal}
         className='fixed inset-0 flex justify-center'
       >
-        <div className='flex w-full max-w-3xl flex-col items-center bg-zinc-300 p-2 dark:bg-zinc-900'>
+        <div className='relative flex w-full max-w-3xl flex-col items-center bg-zinc-300 p-2 dark:bg-zinc-900'>
           <Dialog.Title className='relative w-full text-center'>
             <span className='font-bold uppercase dark:text-white'>{title}</span>
           </Dialog.Title>
           {children}
-        </div>
-        <div className='group absolute top-2 right-5'>
-          <button onClick={closeModal} aria-label='close-modal'>
-            <XIcon className='h-6 w-6 transition-opacity group-hover:opacity-50 dark:stroke-white' />
-          </button>
+          <div className='group absolute top-2 right-5'>
+            <button onClick={closeModal} aria-label='close-modal'>
+              <XIcon className='h-6 w-6 transition-opacity group-hover:opacity-50 dark:stroke-white' />
+            </button>
+          </div>
         </div>
       </Dialog>
     </Transition>
