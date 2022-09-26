@@ -17,7 +17,7 @@ const Controls = () => {
           The keyboard controls are mapped to the move location on screen.
         </div>
 
-        <div className='flex justify-center'>
+        <div className='mt-6 flex justify-center'>
           <div className='space-y-2 rounded-xl bg-gray-200 py-5 px-10'>
             <KeyboardRow>
               <KeyboardKey title='U' description='hit' />
@@ -25,15 +25,9 @@ const Controls = () => {
             </KeyboardRow>
 
             <KeyboardRow isIndented>
-              <KeyboardKey title='J' description='split' />
+              <KeyboardKey title='J' description='split/deal' />
               <KeyboardKey title='K' description='doub.' />
               <KeyboardKey title='L' description='surr.' />
-            </KeyboardRow>
-
-            <div className='h-5'></div>
-
-            <KeyboardRow>
-              <KeyboardKey title='Spacebar' description='deal' isWide />
             </KeyboardRow>
           </div>
         </div>

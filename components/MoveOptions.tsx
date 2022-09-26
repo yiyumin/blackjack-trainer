@@ -46,7 +46,7 @@ const MoveOptions = ({
         </div>
       ) : (
         <div className='flex h-full items-center justify-center'>
-          <MoveOption label='Deal (spacebar)' onClick={onDealCards} />
+          <MoveOption label='Deal (j)' onClick={onDealCards} />
         </div>
       )}
     </div>

@@ -46,19 +46,13 @@ const useBlackjack = (
     useState<PracticeType>();
 
   const dealCards = useCallback(() => {
-    if (isHandDealt) return;
-
     setHand(
       getCards(selectedPracticeType?.handType, selectedPracticeType?.handKey)
     );
     setIsHandDealt(true);
     setIsCorrect(undefined);
     setExplanation('');
-  }, [
-    isHandDealt,
-    selectedPracticeType?.handType,
-    selectedPracticeType?.handKey,
-  ]);
+  }, [selectedPracticeType?.handType, selectedPracticeType?.handKey]);
 
   const updateStats = useCallback(
     (rank1: Rank, rank2: Rank, dealerRank: Rank, isCorrect: boolean) => {
@@ -252,7 +246,7 @@ const useBlackjack = (
 
   const makeMove = useCallback(
     (move: Move) => {
-      if (!isHandDealt || hand === undefined) return;
+      if (hand === undefined) return;
 
       if (
         (move === 'split' && hand.playerCard1.rank !== hand.playerCard2.rank) ||
@@ -283,7 +277,6 @@ const useBlackjack = (
       );
     },
     [
-      isHandDealt,
       hand,
       isDoubleDownAllowed,
       isDoubleDownAfterSplitAllowed,

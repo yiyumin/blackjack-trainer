@@ -58,7 +58,8 @@ const Home: NextPage = () => {
   }, [isPasswordRecoveryMode]);
 
   useEffect(() => {
-    if (isHowToPlayOpen || isStatisticsOpen || isSettingsOpen) return;
+    if (isHowToPlayOpen || isStatisticsOpen || isSettingsOpen || !isHandDealt)
+      return;
 
     const onMoveKeyDown = (e: KeyboardEvent) => {
       if (/^[uijkl]$/.test(e.key)) {
@@ -68,20 +69,33 @@ const Home: NextPage = () => {
 
     document.addEventListener('keydown', onMoveKeyDown);
     return () => document.removeEventListener('keydown', onMoveKeyDown);
-  }, [makeMove, isHowToPlayOpen, isStatisticsOpen, isSettingsOpen]);
+  }, [
+    makeMove,
+    isHowToPlayOpen,
+    isStatisticsOpen,
+    isSettingsOpen,
+    isHandDealt,
+  ]);
 
   useEffect(() => {
-    if (isHowToPlayOpen || isStatisticsOpen || isSettingsOpen) return;
+    if (isHowToPlayOpen || isStatisticsOpen || isSettingsOpen || isHandDealt)
+      return;
 
     const onSpaceKeyDown = (e: KeyboardEvent) => {
-      if (e.key === ' ') {
+      if (e.key === 'j') {
         dealCards();
       }
     };
 
     document.addEventListener('keydown', onSpaceKeyDown);
     return () => document.removeEventListener('keydown', onSpaceKeyDown);
-  }, [dealCards, isHowToPlayOpen, isStatisticsOpen, isSettingsOpen]);
+  }, [
+    dealCards,
+    isHowToPlayOpen,
+    isStatisticsOpen,
+    isSettingsOpen,
+    isHandDealt,
+  ]);
 
   return (
     <>
