@@ -67,36 +67,7 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
   const [isPasswordRecoveryMode, setIsPasswordRecoveryMode] = useState(false);
 
   useEffect(() => {
-    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        if (event == 'PASSWORD_RECOVERY') setIsPasswordRecoveryMode(true);
-        setUserId(session?.user.id ?? null);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    supabaseClient.auth
-      .getSession()
-      .then(({ data: { session } }) => {
-        setUserId(session?.user.id ?? null);
-      })
-      .catch((error) => {
-        toast.error(error);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (!userId) {
-      setUserRecord(null);
-      return;
-    }
-
-    const fetchData = async () => {
+    const fetchData = async (userId: string) => {
       try {
         const { data } = await supabaseClient
           .from('blackjack_trainer')
@@ -125,8 +96,6 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
           );
           if (!settingsIsValid)
             throw new Error('Uncompressed settings is not valid');
-
-          console.log(validStats, validSettings, data.save_freq);
 
           setUserRecord({
             stats: validStats,
@@ -168,8 +137,33 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       }
     };
 
-    fetchData();
-  }, [userId]);
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        if (event == 'PASSWORD_RECOVERY') setIsPasswordRecoveryMode(true);
+        setUserId(session?.user.id ?? null);
+
+        if (session && event == 'SIGNED_IN') {
+          fetchData(session.user.id);
+        }
+        if (event == 'SIGNED_OUT') {
+          setUserRecord(null);
+        }
+      }
+    );
+    supabaseClient.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (session) {
+          setUserId(session.user.id);
+        }
+      })
+      .catch((error) => {
+        toast.error(error);
+      });
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
     try {
@@ -207,6 +201,7 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     try {
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
+        // options: { emailRedirectTo: 'http://localhost:3000' },
       });
       if (error) throw error;
       toast.success('Check your email for the login link!');
@@ -221,6 +216,7 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     try {
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider,
+        // options: { redirectTo: 'http://localhost:3000' },
       });
       if (error) throw error;
     } catch (error) {
