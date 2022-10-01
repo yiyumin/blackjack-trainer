@@ -36,6 +36,7 @@ type SupabaseContextValues = {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
+  deleteUser: () => Promise<void>;
   saveStats: (userId: string, stats: Stats) => Promise<void>;
   saveSettings: (userId: string, settings: Settings) => Promise<void>;
   saveSaveFrequency: (userId: string, saveFrequency: number) => Promise<void>;
@@ -255,6 +256,17 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     setIsPasswordRecoveryMode(false);
   }, []);
 
+  const deleteUser = useCallback(async () => {
+    supabaseClient.auth.signOut();
+    const { error } = await supabaseClient.rpc('deleteUser'); // stored procedure to delete own user's data
+
+    if (error) {
+      toast.error('There was an error deleting your account');
+    } else {
+      toast.success('Account deleted');
+    }
+  }, []);
+
   const saveStats = useCallback(async (userId: string, stats: Stats) => {
     const updates = {
       stats: compressToEncodedURIComponent(JSON.stringify(stats)),
@@ -359,6 +371,7 @@ const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     signOut,
     resetPassword,
     updatePassword,
+    deleteUser,
     saveStats,
     saveSettings,
     saveSaveFrequency,
